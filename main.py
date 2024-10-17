@@ -1,22 +1,30 @@
 ### By Longtail Amethyst Eralbrunia 2024-09-26
 ### Stop posting your shit to Internet
+import json
+from uuid import uuid4
 
-from telegram import Update
-from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, ConversationHandler, filters
+from telegram import Update, InlineQueryResultArticle, InputTextMessageContent
+from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, ConversationHandler, filters, InlineQueryHandler
 from telegram.ext.filters import MessageFilter
+
 
 # import token from file
 with open('bottoken', 'r', encoding='utf-8') as file:
     botToken = file.read().replace('\n', '')
+    # print(botToken)
 
 
-# print(botToken)
+# import quotes from file
+def load_quotes(filename):
+    with open(filename, 'r', encoding='utf-8') as f:
+        return json.load(f)
+
 
 # '国行' reaction filter
 class AppleCNMSGFilter(MessageFilter):
     def filter(self, message):
-        if message.text:
-            return '国行' in message.text
+        if message.text and ('国行' in message.text or '國行' in message.text):
+            return 1
 
 
 # new user filter
@@ -67,16 +75,64 @@ async def AppleCNMSG(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.set_message_reaction(update.effective_chat.id, update.message.message_id, '🤡')
 
 
-if __name__ == '__main__':
-    application = ApplicationBuilder().token(botToken).build()
+# when bot mentioned inline, reply with quote
+async def inlineQuery(update: Update, context):
+    print("Calling inlineQuery")
+    query = update.inline_query.query.strip()
+    if not query:
+        # default result: when user inputs nothing
+        results = [
+            InlineQueryResultArticle(
+                id=str(uuid4()),
+                title='Nya',    # the title
+                input_message_content=InputTextMessageContent('Nya')    # the content user will send
+            )
+        ]
+        await update.inline_query.answer(results)
+        return
 
+    loadedQuotes = load_quotes('quotes.json')
+    # this would read the json everytime the query function called
+    # which is not good, improvement will be needed but later
+    # quotes = ['quote1', 'quote2', 'quote3']   # for debug only
+    # search quotes according to user input
+    filtered_quotes = [
+        quote for quote in loadedQuotes
+        if query in quote['quote'].lower() or query in quote['speaker'].lower()
+    ]
+    if not filtered_quotes:     # if quote not found
+        results = [
+            InlineQueryResultArticle(
+                id=str(uuid4()),
+                title='No matching quotes found nya',
+                input_message_content=InputTextMessageContent('')
+            )
+        ]
+    else:
+        results = [
+            InlineQueryResultArticle(
+                id=str(uuid4()),
+                title=quote['quote'],  # the title
+                description=quote['speaker'],   # the subtitle
+                input_message_content=InputTextMessageContent(quote['quote'])  # the content user will send
+            )
+            for quote in loadedQuotes
+        ]
+    await update.inline_query.answer(results)
+
+
+def main():
+    application = ApplicationBuilder().token(botToken).build()
+    # start handler
     start_handler = CommandHandler('start', start)
     application.add_handler(start_handler)
 
+    # apple CN message handler
     appleCNMSGFilter = AppleCNMSGFilter()
     AppleCNMSG_handler = MessageHandler(appleCNMSGFilter, AppleCNMSG)
     application.add_handler(AppleCNMSG_handler)
 
+    # new user handler
     newUserFilter = NewUserFilter()
     welcomeMSG_handler = ConversationHandler(
         entry_points=[MessageHandler(newUserFilter, SendGroupWelcomeMSG)],
@@ -87,4 +143,12 @@ if __name__ == '__main__':
     )
     application.add_handler(welcomeMSG_handler)
 
+    # inline mentioned handler
+    application.add_handler(InlineQueryHandler(inlineQuery))
+
+    # start the bot
     application.run_polling()
+
+
+if __name__ == '__main__':
+    main()
