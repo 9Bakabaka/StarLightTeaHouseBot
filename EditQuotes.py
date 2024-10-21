@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QTableWidget, QT
 from PyQt5.QtCore import Qt, QEvent
 
 
-def LoadQuotesFromFile():
+def load_quotes_from_file():
     # if quotes.json not exist, open() will create it
     print("Loading quotes from file...")
     try:
@@ -21,7 +21,7 @@ def LoadQuotesFromFile():
     return File
 
 
-def SaveQuotesToFile(quotes):
+def save_quotes_to_file(quotes):
     print("Saving quotes to file...")
     with open('quotes.json', 'w') as file:
         json.dump(quotes, file, ensure_ascii=False, indent=4)
@@ -35,16 +35,16 @@ class QuotesApp(QWidget):
         self.tableWidget = QTableWidget()
         self.tableWidget.setColumnCount(2)
         self.tableWidget.setHorizontalHeaderLabels(['Speaker', 'Quote'])
-        self.InitUI()
+        self.init_ui()
         # detect key press
         self.tableWidget.installEventFilter(self)
 
-    def InitUI(self):
+    def init_ui(self):
         # table layout
         self.setWindowTitle('Quotes Viewer')
         self.setGeometry(100, 100, 600, 400)
         layout = QVBoxLayout()
-        quotes = LoadQuotesFromFile()
+        quotes = load_quotes_from_file()
         self.tableWidget.setRowCount(len(quotes))  # set table row count
         # print content
         for row, item in enumerate(quotes):
@@ -58,10 +58,10 @@ class QuotesApp(QWidget):
         buttonLayout = QHBoxLayout()
         # add column button
         addColumnButton = QPushButton('Add Quote')
-        addColumnButton.clicked.connect(self.AddColumnButtonOnClick)
+        addColumnButton.clicked.connect(self.add_column_button_on_click)
         # save button
         saveButton = QPushButton('Save')
-        saveButton.clicked.connect(self.SaveConfirmMSG)  # when clicked, call SaveConfirmMSG to pop confirm box
+        saveButton.clicked.connect(self.save_confirm_msg)  # when clicked, call SaveConfirmMSG to pop confirm box
         # add buttons to ButtonLayout
         buttonLayout.addWidget(addColumnButton)
         buttonLayout.addWidget(saveButton)
@@ -91,13 +91,13 @@ class QuotesApp(QWidget):
                 return True
         return super().eventFilter(source, event)
 
-    def AddColumnButtonOnClick(self):
+    def add_column_button_on_click(self):
         print("Add Column Button Clicked")
         self.tableWidget.insertRow(self.tableWidget.rowCount())
         self.tableWidget.setItem(self.tableWidget.rowCount() + 1, 0, QTableWidgetItem(''))
         self.tableWidget.setItem(self.tableWidget.rowCount() + 1, 1, QTableWidgetItem(''))
 
-    def SaveQuotes(self):
+    def save_quotes(self):
         print("Save button clicked")
         # check if any cell is empty, show error message box
         for row in range(self.tableWidget.rowCount()):
@@ -111,9 +111,9 @@ class QuotesApp(QWidget):
             speaker = self.tableWidget.item(row, 0).text()
             quote = self.tableWidget.item(row, 1).text()
             quotes.append({'speaker': speaker, 'quote': quote})
-        SaveQuotesToFile(quotes)
+        save_quotes_to_file(quotes)
 
-    def SaveConfirmMSG(self):
+    def save_confirm_msg(self):
         print("Pop save confirm message box")
         reply = QMessageBox.question(self, '确认',
                                      "Are you sure to save the quotes?",
@@ -122,7 +122,7 @@ class QuotesApp(QWidget):
         if reply == QMessageBox.Yes:
             print("Confirm: Yes")
             QMessageBox.information(self, 'Saved', 'Quotes saved.')
-            self.SaveQuotes()
+            self.save_quotes()
         else:
             print("Confirm: No")
             return

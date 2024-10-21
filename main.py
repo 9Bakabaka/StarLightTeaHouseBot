@@ -42,7 +42,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 WaitingForReply = 1
 
 
-async def SendGroupWelcomeMSG(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def send_group_welcome_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
     for new_member in update.message.new_chat_members:
         context.user_data[new_member.id] = {'NewUser': True}
         print("Sending welcome message to new user.")
@@ -56,7 +56,7 @@ async def SendGroupWelcomeMSG(update: Update, context: ContextTypes.DEFAULT_TYPE
     return WaitingForReply
 
 
-async def VerifyTwitterUserName(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def verify_twitter_user_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print("VerifyTwitterUserName Called")
     userID = update.message.from_user.id
     userData = context.user_data.get(userID, {})
@@ -71,12 +71,12 @@ async def VerifyTwitterUserName(update: Update, context: ContextTypes.DEFAULT_TY
 
 
 # mark a crown emoji on the message if it contains '国行'
-async def AppleCNMSG(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def apple_cnmsg(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.set_message_reaction(update.effective_chat.id, update.message.message_id, '🤡')
 
 
 # when bot mentioned inline, reply with quote
-async def inlineQuery(update: Update, context):
+async def inline_query(update: Update, context):
     print("Calling inlineQuery")
     query = update.inline_query.query.strip()
     if not query:
@@ -130,22 +130,22 @@ def main():
 
     # apple CN message handler
     appleCNMSGFilter = AppleCNMSGFilter()
-    AppleCNMSG_handler = MessageHandler(appleCNMSGFilter, AppleCNMSG)
+    AppleCNMSG_handler = MessageHandler(appleCNMSGFilter, apple_cnmsg)
     application.add_handler(AppleCNMSG_handler)
 
     # new user handler
     newUserFilter = NewUserFilter()
     welcomeMSG_handler = ConversationHandler(
-        entry_points=[MessageHandler(newUserFilter, SendGroupWelcomeMSG)],
+        entry_points=[MessageHandler(newUserFilter, send_group_welcome_msg)],
         states={
-            WaitingForReply: [MessageHandler(filters.TEXT & ~filters.COMMAND, VerifyTwitterUserName)]
+            WaitingForReply: [MessageHandler(filters.TEXT & ~filters.COMMAND, verify_twitter_user_name)]
         },
         fallbacks=[]
     )
     application.add_handler(welcomeMSG_handler)
 
     # inline mentioned handler
-    application.add_handler(InlineQueryHandler(inlineQuery))
+    application.add_handler(InlineQueryHandler(inline_query))
 
     # start the bot
     application.run_polling()
