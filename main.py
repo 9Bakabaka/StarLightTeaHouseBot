@@ -71,7 +71,7 @@ async def verify_twitter_user_name(update: Update, context: ContextTypes.DEFAULT
 
 
 # mark a crown emoji on the message if it contains '国行'
-async def apple_cnmsg(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def apple_cn_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.set_message_reaction(update.effective_chat.id, update.message.message_id, '🤡')
 
 
@@ -130,7 +130,7 @@ def main():
 
     # apple CN message handler
     appleCNMSGFilter = AppleCNMSGFilter()
-    AppleCNMSG_handler = MessageHandler(appleCNMSGFilter, apple_cnmsg)
+    AppleCNMSG_handler = MessageHandler(appleCNMSGFilter, apple_cn_msg)
     application.add_handler(AppleCNMSG_handler)
 
     # new user handler
