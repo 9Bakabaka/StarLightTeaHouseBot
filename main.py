@@ -96,10 +96,11 @@ async def inlineQuery(update: Update, context):
     # which is not good, improvement will be needed but later
     # quotes = ['quote1', 'quote2', 'quote3']   # for debug only
     # search quotes according to user input
-    filtered_quotes = [
-        quote for quote in loadedQuotes
-        if query in quote['quote'].lower() or query in quote['speaker'].lower()
-    ]
+    filtered_quotes = sorted(
+        loadedQuotes,
+        key=lambda quote: (quote['quote'].count(query) + quote['speaker'].count(query)),
+        reverse=True
+    )
     if not filtered_quotes:     # if quote not found
         results = [
             InlineQueryResultArticle(
@@ -116,7 +117,7 @@ async def inlineQuery(update: Update, context):
                 description=quote['speaker'],   # the subtitle
                 input_message_content=InputTextMessageContent(quote['quote'])  # the content user will send
             )
-            for quote in loadedQuotes
+            for quote in filtered_quotes
         ]
     await update.inline_query.answer(results)
 
