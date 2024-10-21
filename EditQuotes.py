@@ -10,8 +10,13 @@ from PyQt5.QtCore import Qt, QEvent
 def LoadQuotesFromFile():
     # if quotes.json not exist, open() will create it
     print("Loading quotes from file...")
-    with open('quotes.json', 'r') as file:
-        File = json.load(file)
+    try:
+        with open('quotes.json', 'r') as file:
+            File = json.load(file)
+    except FileNotFoundError:
+        with open('quotes.json', 'w') as file:
+            json.dump([], file)
+        File = []
     print("Quotes loaded.")
     return File
 
