@@ -1,12 +1,17 @@
 ### By Longtail Amethyst Eralbrunia 2024-09-26
 ### Stop posting your shit to Internet
 import json
+import time
+import asyncio
+from lib2to3.fixes.fix_input import context
 from uuid import uuid4
 
 from telegram import Update, InlineQueryResultArticle, InputTextMessageContent
-from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, ConversationHandler, filters, InlineQueryHandler
+from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, ConversationHandler, filters, \
+    InlineQueryHandler
 from telegram.ext.filters import MessageFilter
 
+import notifyAdmin
 
 # import token from file
 with open('bottoken', 'r', encoding='utf-8') as file:
@@ -38,36 +43,51 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Nya")
 
 
-# If a new user joins the group, send a welcome message
-WaitingForReply = 1
+class NewUserVerify:
+    # If a new user joins the group, send a welcome message
+    WaitingForReply = 1
+    verification_timeout = 300  # seconds
+    new_user_data = {}
 
+    async def send_group_welcome_msg(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        for new_member in update.message.new_chat_members:
+            self.new_user_data[new_member.id] = {'NewUser': True}
+            print("User_data updated to: ", self.new_user_data)
+            print("Sending welcome message to new user.")
+            await context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=f"@{new_member.username}\n"
+                     f"{new_member.first_name or ''} {new_member.last_name or ''} Welcome to the group!\n"
+                     f"Please provide your twitter account(@username) in order to verify your identity."
+                     f"You shall only type @yourID into the chat box. But not like 'I am yourID'."
+            )
+            asyncio.create_task(self.verify_timer(new_member.id))
+        return self.WaitingForReply
 
-async def send_group_welcome_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    for new_member in update.message.new_chat_members:
-        context.user_data[new_member.id] = {'NewUser': True}
-        print("Sending welcome message to new user.")
-        await context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            text=f"@{new_member.username}\n"
-                 f"{new_member.first_name or ''} {new_member.last_name or ''} Welcome to the group!\n"
-                 f"Please provide your twitter account(@username) in order to verify your identity."
-                 f"You shall only type @yourID into the chat box. But not like 'I am yourID'."
-        )
-    return WaitingForReply
+    async def verify_twitter_user_name(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        print("VerifyTwitterUserName Called")
+        userID = update.message.from_user.id
+        userData = context.user_data.get(userID, {})
+        if update.message.text.startswith('@') and userData.get('NewUser', True):
+            print("Delete the new user from new_user_data")
+            del self.new_user_data[userID]
+            print("User_data updated to: ", self.new_user_data)
+            await context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=f"Your twitter account is verifying... Please wait for group admin to verify your identity."
+            )
+            return ConversationHandler.END
 
-
-async def verify_twitter_user_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    print("VerifyTwitterUserName Called")
-    userID = update.message.from_user.id
-    userData = context.user_data.get(userID, {})
-    if update.message.text.startswith('@') and userData.get('NewUser', True):
-        print("Updating NewUser to false.")
-        userData.update({'NewUser': False})
-        await context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            text=f"Your twitter account is verifying... Please wait for group admin to verify your identity."
-        )
-        return ConversationHandler.END
+    async def verify_timer(self, new_member_id):
+        print("VerifyTimer Called")
+        await asyncio.sleep(self.verification_timeout)
+        # if new_member_id is still in user_data after timeout
+        if new_member_id in self.new_user_data:
+            # put your custom methods here
+            # for example, I will call notify_admin from notifyAdmin.py
+            print("User verification timeout.")
+            notifyAdmin.notify_admin(context, f"User {new_member_id} has not verified their account in time.")
+        return
 
 
 # mark a crown emoji on the message if it contains '国行'
@@ -84,8 +104,8 @@ async def inline_query(update: Update, context):
         results = [
             InlineQueryResultArticle(
                 id=str(uuid4()),
-                title='Nya',    # the title
-                input_message_content=InputTextMessageContent('Nya')    # the content user will send
+                title='Nya',  # the title
+                input_message_content=InputTextMessageContent('Nya')  # the content user will send
             )
         ]
         await update.inline_query.answer(results)
@@ -101,7 +121,7 @@ async def inline_query(update: Update, context):
         key=lambda quote: (quote['quote'].count(query) + quote['speaker'].count(query)),
         reverse=True
     )
-    if not filtered_quotes:     # if quote not found
+    if not filtered_quotes:  # if quote not found
         results = [
             InlineQueryResultArticle(
                 id=str(uuid4()),
@@ -114,7 +134,7 @@ async def inline_query(update: Update, context):
             InlineQueryResultArticle(
                 id=str(uuid4()),
                 title=quote['quote'],  # the title
-                description=quote['speaker'],   # the subtitle
+                description=quote['speaker'],  # the subtitle
                 input_message_content=InputTextMessageContent(quote['quote'])  # the content user will send
             )
             for quote in filtered_quotes
@@ -134,11 +154,12 @@ def main():
     application.add_handler(AppleCNMSG_handler)
 
     # new user handler
+    new_user_verify = NewUserVerify()
     newUserFilter = NewUserFilter()
     welcomeMSG_handler = ConversationHandler(
-        entry_points=[MessageHandler(newUserFilter, send_group_welcome_msg)],
+        entry_points=[MessageHandler(newUserFilter, new_user_verify.send_group_welcome_msg)],
         states={
-            WaitingForReply: [MessageHandler(filters.TEXT & ~filters.COMMAND, verify_twitter_user_name)]
+            new_user_verify.WaitingForReply: [MessageHandler(filters.TEXT & ~filters.COMMAND, new_user_verify.verify_twitter_user_name)]
         },
         fallbacks=[]
     )
