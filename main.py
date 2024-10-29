@@ -2,6 +2,7 @@
 ### Stop posting your shit to Internet
 import json
 import time
+import datetime
 import asyncio
 from lib2to3.fixes.fix_input import context
 from uuid import uuid4
@@ -52,8 +53,8 @@ class NewUserVerify:
     async def send_group_welcome_msg(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         for new_member in update.message.new_chat_members:
             self.new_user_data[new_member.id] = {'NewUser': True}
-            print("User_data updated to: ", self.new_user_data)
-            print("Sending welcome message to new user.")
+            print(datetime.datetime.now(), "\t", "User_data updated to: ", self.new_user_data)
+            print(datetime.datetime.now(), "\t", "Sending welcome message to new user.")
             await context.bot.send_message(
                 chat_id=update.effective_chat.id,
                 text=f"@{new_member.username}\n"
@@ -65,13 +66,13 @@ class NewUserVerify:
         return self.WaitingForReply
 
     async def verify_twitter_user_name(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        print("VerifyTwitterUserName Called")
+        print(datetime.datetime.now(), "\t", "VerifyTwitterUserName Called")
         userID = update.message.from_user.id
         userData = context.user_data.get(userID, {})
         if update.message.text.startswith('@') and userData.get('NewUser', True):
-            print("Delete the new user from new_user_data")
+            print(datetime.datetime.now(), "\t", "Delete the new user from new_user_data")
             del self.new_user_data[userID]
-            print("User_data updated to: ", self.new_user_data)
+            print(datetime.datetime.now(), "\t", "User_data updated to: ", self.new_user_data)
             await context.bot.send_message(
                 chat_id=update.effective_chat.id,
                 text=f"Your twitter account is verifying... Please wait for group admin to verify your identity."
@@ -79,13 +80,13 @@ class NewUserVerify:
             return ConversationHandler.END
 
     async def verify_timer(self, new_member_id):
-        print("VerifyTimer Called")
+        print(datetime.datetime.now(), "\t", "VerifyTimer Called")
         await asyncio.sleep(self.verification_timeout)
         # if new_member_id is still in user_data after timeout
         if new_member_id in self.new_user_data:
             # put your custom methods here
             # for example, I will call notify_admin from notifyAdmin.py
-            print("User verification timeout.")
+            print(datetime.datetime.now(), "\t", "User verification timeout.")
             notifyAdmin.notify_admin(context, f"User {new_member_id} has not verified their account in time.")
         return
 
@@ -97,8 +98,10 @@ async def apple_cn_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # when bot mentioned inline, reply with quote
 async def inline_query(update: Update, context):
-    print("Calling inlineQuery")
+    print(datetime.datetime.now(), "\t", "Calling inlineQuery")
     query = update.inline_query.query.strip()
+    # if user input nothing, show the list instead of 'Nya'
+    '''
     if not query:
         # default result: when user inputs nothing
         results = [
@@ -110,7 +113,7 @@ async def inline_query(update: Update, context):
         ]
         await update.inline_query.answer(results)
         return
-
+    '''
     loadedQuotes = load_quotes('quotes.json')
     # this would read the json everytime the query function called
     # which is not good, improvement will be needed but later
