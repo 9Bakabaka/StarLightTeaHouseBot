@@ -7,7 +7,7 @@ import asyncio
 from lib2to3.fixes.fix_input import context
 from uuid import uuid4
 
-from telegram import Update, InlineQueryResultArticle, InputTextMessageContent
+from telegram import Update, InlineQueryResultArticle, InputTextMessageContent, InlineQueryResultCachedSticker
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, ConversationHandler, filters, \
     InlineQueryHandler
 from telegram.ext.filters import MessageFilter
@@ -39,9 +39,23 @@ class NewUserFilter(MessageFilter):
         return message.new_chat_members
 
 
+# sticker filter
+class StickerFilter(MessageFilter):
+    def filter(self, message):
+        print(datetime.datetime.now(), "\t", "Received a sticker.")
+        return message.sticker
+
+
 # start command handler
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print(datetime.datetime.now(), "\t", "Sending start message.")
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Nya")
+
+
+# sticker handler
+async def get_sticker_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print(datetime.datetime.now(), "\t", "Sending sticker ID.")
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.sticker.file_id)
 
 
 class NewUserVerify:
@@ -124,6 +138,7 @@ async def inline_query(update: Update, context):
         key=lambda quote: (quote['quote'].count(query) + quote['speaker'].count(query)),
         reverse=True
     )
+    '''
     if not filtered_quotes:  # if quote not found
         results = [
             InlineQueryResultArticle(
@@ -133,15 +148,26 @@ async def inline_query(update: Update, context):
             )
         ]
     else:
-        results = [
-            InlineQueryResultArticle(
+    '''
+    results = []
+    if "哎呀" in query:
+        results += [(
+            InlineQueryResultCachedSticker(
                 id=str(uuid4()),
-                title=quote['quote'],  # the title
-                description=quote['speaker'],  # the subtitle
-                input_message_content=InputTextMessageContent(quote['quote'])  # the content user will send
+                sticker_file_id="CAACAgUAAxkBAAIBA2cgmvcwGcdCVA1HwwsnjALyL80-AAJdBAAC_9CJVsMSLkHioimoNgQ",
+
             )
-            for quote in filtered_quotes
-        ]
+        )]
+
+    results.extend([
+        InlineQueryResultArticle(
+            id=str(uuid4()),
+            title=quote['quote'],  # the title
+            description=quote['speaker'],  # the subtitle
+            input_message_content=InputTextMessageContent(quote['quote'])  # the content user will send
+        )
+        for quote in filtered_quotes
+    ])
     await update.inline_query.answer(results)
 
 
@@ -150,6 +176,11 @@ def main():
     # start handler
     start_handler = CommandHandler('start', start)
     application.add_handler(start_handler)
+
+    # sticker handler
+    stickerFilter = StickerFilter()
+    sticker_handler = MessageHandler(stickerFilter, get_sticker_id)
+    application.add_handler(sticker_handler)
 
     # apple CN message handler
     appleCNMSGFilter = AppleCNMSGFilter()
