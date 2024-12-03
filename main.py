@@ -6,6 +6,7 @@ import datetime
 import asyncio
 from lib2to3.fixes.fix_input import context
 from uuid import uuid4
+import random
 
 from telegram import Update, InlineQueryResultArticle, InputTextMessageContent, InlineQueryResultCachedSticker
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, ConversationHandler, filters, \
@@ -20,6 +21,10 @@ with open('bottoken', 'r', encoding='utf-8') as file:
     # print(botToken)
 
 
+# todo: silence for x minutes
+# todo: 繁体国行检测开关
+# todo: 尾巴触电
+
 # import quotes from file
 def load_quotes(filename):
     with open(filename, 'r', encoding='utf-8') as f:
@@ -33,6 +38,26 @@ class AppleCNMSGFilter(MessageFilter):
             return 1
 
 
+# possibility filter
+class XMAndFireReactionFilter(MessageFilter):
+    possibility = 0.1
+
+    def filter(self, message):
+        random_result = random.random()
+        # print(datetime.datetime.now(), "\t", "Random possibility: ", random_result)
+        if random_result < self.possibility:
+            return 1
+
+# 吃什么 filter
+class WhatToEatFilter(MessageFilter):
+    def filter(self, message):
+        if message.text:
+            if '/eattoday' == message.text:
+                return 1
+            if ('今天吃什么' or '等会吃什么' or '早上吃什么' or '中午吃什么' or '下午吃什么' or '晚上吃什么' or '饿了' or '好饿') in message.text:
+                return 1
+
+
 # new user filter
 class NewUserFilter(MessageFilter):
     def filter(self, message):
@@ -42,13 +67,14 @@ class NewUserFilter(MessageFilter):
 # sticker filter
 class StickerFilter(MessageFilter):
     def filter(self, message):
-        print(datetime.datetime.now(), "\t", "Received a sticker.")
-        return message.sticker
+        if message.sticker and message.chat.type == 'private':
+            print(datetime.datetime.now(), "\t", "Received a sticker.")
+            return message.sticker
 
 
 # start command handler
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    print(datetime.datetime.now(), "\t", "Sending start message.")
+    print(datetime.datetime.now(), "\t", "Received Start.")
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Nya")
 
 
@@ -108,6 +134,32 @@ class NewUserVerify:
 # mark a crown emoji on the message if it contains '国行'
 async def apple_cn_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.set_message_reaction(update.effective_chat.id, update.message.message_id, '🤡')
+
+
+# random reply '羡慕' and fire reaction according to possibility
+async def xm_and_fire(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # 50 50
+    if random.random() < 0.5:
+        print(datetime.datetime.now(), "\t", "Sending 羡慕")
+        await update.message.reply_text('羡慕')
+    else:
+        print(datetime.datetime.now(), "\t", "Reacting 🔥")
+        await context.bot.set_message_reaction(update.effective_chat.id, update.message.message_id, '🔥')
+
+
+# random reply a kind of food when calling /eattoday
+async def what_to_eat(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # 5% chance trigger I EAT MYSELF
+    chance_I_EAT_MYSELF = 0.05
+    if random.random() < chance_I_EAT_MYSELF:
+        print(datetime.datetime.now(), "\t", "What to eat today called.")
+        await update.message.reply_text("吃" + update.message.from_user.first_name + update.message.from_user.last_name + "！")
+    else:
+        # food = ['麻辣烫', '炒饭', '炒面', '炒粉', '炒河粉', '炒米粉', '炒土豆丝', '炒青菜', '炒西兰花', '炒芹菜', '炒莴笋', '炒豆角', '炒茄子']
+        with open('foodlist.txt', 'r', encoding='utf-8') as food_list_file:
+            food = [line.strip() for line in food_list_file.readlines()]
+        print(datetime.datetime.now(), "\t", "What to eat today called.")
+        await update.message.reply_text("吃" + random.choice(food) + "！")
 
 
 # when bot mentioned inline, reply with quote
@@ -183,9 +235,19 @@ def main():
     application.add_handler(sticker_handler)
 
     # apple CN message handler
-    appleCNMSGFilter = AppleCNMSGFilter()
-    AppleCNMSG_handler = MessageHandler(appleCNMSGFilter, apple_cn_msg)
-    application.add_handler(AppleCNMSG_handler)
+    # appleCNMSGFilter = AppleCNMSGFilter()
+    # AppleCNMSG_handler = MessageHandler(appleCNMSGFilter, apple_cn_msg)
+    # application.add_handler(AppleCNMSG_handler)
+
+    # xm and fire reaction handler
+    xm_and_fire_reaction_filter = XMAndFireReactionFilter()
+    xm_and_fire_reaction_handler = MessageHandler(xm_and_fire_reaction_filter, xm_and_fire)
+    application.add_handler(xm_and_fire_reaction_handler)
+
+    # what to eat today handler
+    what_to_eat_filter = WhatToEatFilter()
+    what_to_eat_handler = MessageHandler(what_to_eat_filter, what_to_eat)
+    application.add_handler(what_to_eat_handler)
 
     # new user handler
     new_user_verify = NewUserVerify()
@@ -193,7 +255,8 @@ def main():
     welcomeMSG_handler = ConversationHandler(
         entry_points=[MessageHandler(newUserFilter, new_user_verify.send_group_welcome_msg)],
         states={
-            new_user_verify.WaitingForReply: [MessageHandler(filters.TEXT & ~filters.COMMAND, new_user_verify.verify_twitter_user_name)]
+            new_user_verify.WaitingForReply: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, new_user_verify.verify_twitter_user_name)]
         },
         fallbacks=[]
     )
