@@ -27,4 +27,8 @@ Create a file named "quotes.json" and put quotes like this:
 You can also use EditQuotes.py to edit it with an interface.
 
 ### About sticker file id query:  
-Send a sticker to bot dm. It would return the file id.
+Send a sticker to bot pm. It would return the file id.
+
+### About what to eat today:
+Put food names in a file named "foodlist.txt", one food name per line.
+Bot would randomly choose one food name from the list.
