@@ -5,6 +5,9 @@ This is a telegram bot developed for StarLight Tea house.
 ### About Bot Token:
 Create a file named "bottoken" at the same folder as the script and put your token in it.  
 
+### About Status
+Use command "/status" to check server status. Including CPU, memory usage and network latency.
+
 ### About welcome message:  
 Bot would send a welcome message to any new user entered the group chat.  
 If the new user send message starts with "@" [@.*], bot would send another confirmation message.
@@ -31,4 +34,4 @@ Send a sticker to bot pm. It would return the file id.
 
 ### About what to eat today:
 Put food names in a file named "foodlist.txt", one food name per line.
-Bot would randomly choose one food name from the list.
+When triggered "/eattoday" or message contain words like "今天吃什么", bot would randomly choose one food name from the list.
