@@ -37,7 +37,6 @@ class AppleCNMSGFilter(MessageFilter):
         if message.text and ('国行' in message.text or '國行' in message.text):
             return 1
 
-
 # possibility filter
 class XMAndFireReactionFilter(MessageFilter):
     possibility = 0.1
@@ -52,7 +51,7 @@ class XMAndFireReactionFilter(MessageFilter):
 class WhatToEatFilter(MessageFilter):
     def filter(self, message):
         if message.text:
-            if '/eattoday' == message.text:
+            if '/eattoday' in message.text:
                 return 1
             if ('今天吃什么' or '等会吃什么' or '早上吃什么' or '中午吃什么' or '下午吃什么' or '晚上吃什么' or '饿了' or '好饿') in message.text:
                 return 1
@@ -74,7 +73,7 @@ class StickerFilter(MessageFilter):
 
 # start command handler
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    print(datetime.datetime.now(), "\t", "Received Start.")
+    print(datetime.datetime.now(), "\t", "Received /start.")
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Nya")
 
 
@@ -140,7 +139,7 @@ async def apple_cn_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def xm_and_fire(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # 50 50
     if random.random() < 0.5:
-        print(datetime.datetime.now(), "\t", "Sending 羡慕")
+        print(datetime.datetime.now(), "\t", "Replying 羡慕")
         await update.message.reply_text('羡慕')
     else:
         print(datetime.datetime.now(), "\t", "Reacting 🔥")
@@ -239,11 +238,6 @@ def main():
     # AppleCNMSG_handler = MessageHandler(appleCNMSGFilter, apple_cn_msg)
     # application.add_handler(AppleCNMSG_handler)
 
-    # xm and fire reaction handler
-    xm_and_fire_reaction_filter = XMAndFireReactionFilter()
-    xm_and_fire_reaction_handler = MessageHandler(xm_and_fire_reaction_filter, xm_and_fire)
-    application.add_handler(xm_and_fire_reaction_handler)
-
     # what to eat today handler
     what_to_eat_filter = WhatToEatFilter()
     what_to_eat_handler = MessageHandler(what_to_eat_filter, what_to_eat)
@@ -261,6 +255,12 @@ def main():
         fallbacks=[]
     )
     application.add_handler(welcomeMSG_handler)
+
+    # this handler must be put after all message handlers
+    # xm and fire reaction handler
+    xm_and_fire_reaction_filter = XMAndFireReactionFilter()
+    xm_and_fire_reaction_handler = MessageHandler(xm_and_fire_reaction_filter, xm_and_fire)
+    application.add_handler(xm_and_fire_reaction_handler)
 
     # inline mentioned handler
     application.add_handler(InlineQueryHandler(inline_query))
