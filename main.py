@@ -7,6 +7,8 @@ import asyncio
 from lib2to3.fixes.fix_input import context
 from uuid import uuid4
 import random
+import psutil
+from ping3 import ping
 
 from telegram import Update, InlineQueryResultArticle, InputTextMessageContent, InlineQueryResultCachedSticker
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, ConversationHandler, filters, \
@@ -81,6 +83,25 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def get_sticker_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(datetime.datetime.now(), "\t", "Sending sticker ID.")
     await context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.sticker.file_id)
+
+
+# system status handler
+async def system_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print(datetime.datetime.now(), "\t", "Received /status.")
+    cpu_percent = psutil.cpu_percent()
+    memory_info = psutil.virtual_memory()
+    try:
+        ping_result = int(ping('8.8.8.8', unit='ms'))
+        if ping_result is None:
+            ping_result = "Timeout"
+    except Exception as e:
+        ping_result = "Error, " + str(e)
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=f"CPU: {cpu_percent}%\n"
+             f"Memory: {memory_info.percent}%\n"
+             f"Network: {ping_result} ms to 8.8.8.8"
+    )
 
 
 class NewUserVerify:
@@ -232,6 +253,10 @@ def main():
     stickerFilter = StickerFilter()
     sticker_handler = MessageHandler(stickerFilter, get_sticker_id)
     application.add_handler(sticker_handler)
+
+    # system status handler
+    status_handler = CommandHandler('status', system_status)
+    application.add_handler(status_handler)
 
     # apple CN message handler
     # appleCNMSGFilter = AppleCNMSGFilter()
