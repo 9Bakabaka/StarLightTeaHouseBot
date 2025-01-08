@@ -4,6 +4,7 @@ import json
 import time
 import datetime
 import asyncio
+import re
 from lib2to3.fixes.fix_input import context
 from uuid import uuid4
 import random
@@ -26,6 +27,7 @@ with open('bottoken', 'r', encoding='utf-8') as file:
 # todo: silence for x minutes
 # todo: 繁体国行检测开关
 # todo: 尾巴触电
+# todo: add quote, print quote list and delete quote
 
 # import quotes from file
 def load_quotes(filename):
@@ -41,7 +43,7 @@ class AppleCNMSGFilter(MessageFilter):
 
 # possibility filter
 class XMAndFireReactionFilter(MessageFilter):
-    possibility = 0.1
+    possibility = 0.05
 
     def filter(self, message):
         random_result = random.random()
@@ -55,7 +57,7 @@ class WhatToEatFilter(MessageFilter):
         if message.text:
             if '/eattoday' in message.text:
                 return 1
-            if ('今天吃什么' or '等会吃什么' or '早上吃什么' or '中午吃什么' or '下午吃什么' or '晚上吃什么' or '饿了' or '好饿') in message.text:
+            if ('今天吃什么' or '等会吃什么' or '早上吃什么' or '中午吃什么' or '下午吃什么' or '晚上吃什么' or '饿了' or '好饿' or '饿' or '饿饿') in message.text:
                 return 1
 
 
@@ -91,7 +93,7 @@ async def system_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     cpu_percent = psutil.cpu_percent()
     memory_info = psutil.virtual_memory()
     try:
-        ping_result = int(ping('8.8.8.8', unit='ms'))
+        ping_result = int(ping('8.8.8.8', unit='ms', timeout=10))
         if ping_result is None:
             ping_result = "Timeout"
     except Exception as e:
@@ -103,11 +105,84 @@ async def system_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
              f"Network: {ping_result} ms to 8.8.8.8"
     )
 
+# group welcome message setting handler
+async def group_welcome_msg_setting(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print(datetime.datetime.now(), "\t", "Received " + update.message.text + " ", end="")
+    if update.effective_chat.type not in ['group', 'supergroup']:
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="This command is only available in group.")
+        print("Not a group chat.")
+        return
+    # if only /groupwelcome, show usage
+    if update.message.text == '/groupwelcome':
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="Usage:\n/groupwelcome <on/off> Toggle group welcome message.\n/groupwelcome setmsg <message> Set group welcome message.\n/groupwelcome verify <on/off> Set group verify.\n/groupwelcome vffilter <regex> Set group verify filter.\n/groupwelcome setvfmsg <message> Set group verify message.\n/groupwelcome setvffailmsg <message> Set group verify fail message.")
+        print("Showing usage")
+    else:   # else, read config file, locate current group and ready to edit
+        try:
+            with open('welcome_msg_config.json', 'r', encoding='utf-8') as file:
+                welcome_msg_config = json.load(file)
+        except (json.JSONDecodeError, FileNotFoundError):
+            welcome_msg_config = []
+
+        # search for this group in config
+        # if not found, use default group config, if found, use the found group config
+        group = {'groupid': update.effective_chat.id, 'welcome': False, 'message': '', 'verify': False, 'verify_filter': '', 'verify_msg': '', 'verify_fail_msg': ''}
+        for timer in welcome_msg_config:
+            if timer['groupid'] == update.effective_chat.id:
+                group = timer
+                break
+        # only group admins can use the following commands
+        if not update.effective_chat.get_member(update.effective_user.id).status in ['administrator', 'creator']:
+            await context.bot.send_message(chat_id=update.effective_chat.id, text="Only group admins can use this command.")
+            # command handler in else
+        else:
+            if update.message.text == '/groupwelcome on':
+                group['welcome'] = True
+                await context.bot.send_message(chat_id=update.effective_chat.id, text="Welcome message enabled.")
+                print("Welcome message enabled.")
+            elif update.message.text == '/groupwelcome off':
+                group['welcome'] = False
+                await context.bot.send_message(chat_id=update.effective_chat.id, text="Welcome message disabled.")
+                print("Welcome message disabled.")
+            elif update.message.text.startswith('/groupwelcome setmsg '):
+                group['message'] = update.message.text.replace('/groupwelcome setmessage ', '')
+                await context.bot.send_message(chat_id=update.effective_chat.id, text="Welcome message updated.")
+                print("Welcome message updated.")
+            elif update.message.text.startswith('/groupwelcome verify on'):
+                group['verify'] = True
+                await context.bot.send_message(chat_id=update.effective_chat.id, text="Group verify enabled.")
+                print("Group verify enabled.")
+            elif update.message.text.startswith('/groupwelcome verify off'):
+                group['verify'] = False
+                await context.bot.send_message(chat_id=update.effective_chat.id, text="Group verify disabled.")
+                print("Group verify disabled.")
+            elif update.message.text.startswith('/groupwelcome vffilter '):
+                group['verify_filter'] = update.message.text.replace('/groupwelcome vffilter ', '')
+                await context.bot.send_message(chat_id=update.effective_chat.id, text="Group verify filter updated.")
+                print("Group verify filter updated.")
+            elif update.message.text.startswith('/groupwelcome setvfmsg '):
+                group['verify_msg'] = update.message.text.replace('/groupwelcome setvfmsg ', '')
+                await context.bot.send_message(chat_id=update.effective_chat.id, text="Group verify message updated.")
+                print("Group verify message updated.")
+            elif update.message.text.startswith('/groupwelcome setvffailmsg '):
+                group['verify_fail_msg'] = update.message.text.replace('/groupwelcome setvffailmsg ', '')
+                await context.bot.send_message(chat_id=update.effective_chat.id, text="Group verify fail message updated.")
+                print("Group verify fail message updated.")
+            else:
+                await context.bot.send_message(chat_id=update.effective_chat.id, text="Command not recognized.\nUsage:\n/groupwelcome <on/off>\n/groupwelcome setmessage <message>")
+
+        # save config file
+        if group not in welcome_msg_config:
+            welcome_msg_config.append(group)
+        else:
+            welcome_msg_config[welcome_msg_config.index(group)] = group
+        with open('welcome_msg_config.json', 'w', encoding='utf-8') as file:
+            json.dump(welcome_msg_config, file, indent=4)
+
 
 class NewUserVerify:
     # If a new user joins the group, send a welcome message
     WaitingForReply = 1
-    verification_timeout = 300  # seconds
+    verification_timeout = 30  # seconds
     new_user_data = {}
 
     async def send_group_welcome_msg(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -115,39 +190,95 @@ class NewUserVerify:
             self.new_user_data[new_member.id] = {'NewUser': True}
             print(datetime.datetime.now(), "\t", "User_data updated to: ", self.new_user_data)
             print(datetime.datetime.now(), "\t", "Sending welcome message to new user.")
+            # get welcome message text from config
+            # open file
+            try:
+                with open('welcome_msg_config.json', 'r', encoding='utf-8') as file:
+                    welcome_msg_config = json.load(file)
+            except Exception as e:
+                print(datetime.datetime.now(), "\t", "Error reading welcome_msg_config.json: ", e)
+                await context.bot.send_message(chat_id=update.effective_chat.id, text="Error: " + str(e) + "\nPlease contact the admin.")
+            # search for this group in config
+            for group in welcome_msg_config:
+                if group['groupid'] == update.effective_chat.id:
+                    welcome_msg = group['message']
+                    # reformat welcome message
+                    # {new_member_username}, {new_member_first_name}, {and new_member_last_name} is supported
+                    new_member = update.message.new_chat_members[0]
+                    welcome_msg = welcome_msg.format(
+                        new_member_username=new_member.username or 'Username not visible',
+                        new_member_first_name=new_member.first_name or '',
+                        new_member_last_name=new_member.last_name or ''
+                    )
+                    break
+
             await context.bot.send_message(
                 chat_id=update.effective_chat.id,
-                text=f"@{new_member.username}\n"
-                     f"{new_member.first_name or ''} {new_member.last_name or ''} Welcome to the group!\n"
-                     f"Please provide your twitter account(@username) in order to verify your identity."
-                     f"You shall only type @yourID into the chat box. But not like 'I am yourID'."
+                text=f"{welcome_msg}\n"
             )
-            asyncio.create_task(self.verify_timer(new_member.id))
+            # set timer for new member
+            timer_task = asyncio.create_task(self.verify_timer(new_member.id, update))
+            self.new_user_data[new_member.id]['timer_task'] = timer_task
         return self.WaitingForReply
 
     async def verify_twitter_user_name(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         print(datetime.datetime.now(), "\t", "VerifyTwitterUserName Called")
         userID = update.message.from_user.id
-        userData = context.user_data.get(userID, {})
-        if update.message.text.startswith('@') and userData.get('NewUser', True):
+        user_data = self.new_user_data.get(userID, {})
+        try:
+            with open('welcome_msg_config.json', 'r', encoding='utf-8') as file:
+                welcome_msg_config = json.load(file)
+        except Exception as e:
+            print(datetime.datetime.now(), "\t", "Error reading welcome_msg_config.json: ", e)
+            await context.bot.send_message(chat_id=update.effective_chat.id, text="Error: " + str(e) + "\nPlease contact the admin.")
+        # get filter in regex for this group
+        verify_filter = r'.*'
+        verify_msg = ''
+        verify_fail_msg = ''
+        for group in welcome_msg_config:
+            if group['groupid'] == update.effective_chat.id:
+                verify_filter = group['verify_filter']
+                print("Verify filter: ", verify_filter)
+                verify_msg = group['verify_msg']
+                verify_fail_msg = group['verify_fail_msg']
+                break
+
+        if re.match(verify_filter, update.message.text) and user_data.get('NewUser', True):
             print(datetime.datetime.now(), "\t", "Delete the new user from new_user_data")
+            # remove the timer
+            timer_task = user_data.get('timer_task')
+            if timer_task:
+                    timer_task.cancel()
             del self.new_user_data[userID]
             print(datetime.datetime.now(), "\t", "User_data updated to: ", self.new_user_data)
             await context.bot.send_message(
                 chat_id=update.effective_chat.id,
-                text=f"Your twitter account is verifying... Please wait for group admin to verify your identity."
+                text=f"{verify_msg}\n"
             )
             return ConversationHandler.END
+        else:
+            # tell user to send their account in right format
+            await context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=f"{verify_fail_msg}\n"
+            )
+            return self.WaitingForReply
 
-    async def verify_timer(self, new_member_id):
+    async def verify_timer(self, new_member_id, update: Update):
         print(datetime.datetime.now(), "\t", "VerifyTimer Called")
         await asyncio.sleep(self.verification_timeout)
         # if new_member_id is still in user_data after timeout
+        userID = update.message.from_user.id
+        user_data = self.new_user_data.get(userID, {})
         if new_member_id in self.new_user_data:
             # put your custom methods here
             # for example, I will call notify_admin from notifyAdmin.py
             print(datetime.datetime.now(), "\t", "User verification timeout.")
             notifyAdmin.notify_admin(context, f"User {new_member_id} has not verified their account in time.")
+            timer_task = user_data.get('timer_task')
+            if timer_task:
+                timer_task.cancel()
+            del self.new_user_data[userID]
         return
 
 
@@ -245,28 +376,46 @@ async def inline_query(update: Update, context):
 
 def main():
     application = ApplicationBuilder().token(botToken).build()
+
+    # global function switches
+    start_handler_switch = True
+    sticker_handler_switch = True
+    system_status_handler_switch = True
+    apple_cn_msg_handler_switch = False
+    what_to_eat_today_handler_switch = True
+    xm_ad_fire_switch = True
+
     # start handler
-    start_handler = CommandHandler('start', start)
-    application.add_handler(start_handler)
+    if start_handler_switch:
+        start_handler = CommandHandler('start', start)
+        application.add_handler(start_handler)
 
     # sticker handler
-    stickerFilter = StickerFilter()
-    sticker_handler = MessageHandler(stickerFilter, get_sticker_id)
-    application.add_handler(sticker_handler)
+    if sticker_handler_switch:
+        stickerFilter = StickerFilter()
+        sticker_handler = MessageHandler(stickerFilter, get_sticker_id)
+        application.add_handler(sticker_handler)
 
     # system status handler
-    status_handler = CommandHandler('status', system_status)
-    application.add_handler(status_handler)
+    if system_status_handler_switch:
+        status_handler = CommandHandler('status', system_status)
+        application.add_handler(status_handler)
 
     # apple CN message handler
-    # appleCNMSGFilter = AppleCNMSGFilter()
-    # AppleCNMSG_handler = MessageHandler(appleCNMSGFilter, apple_cn_msg)
-    # application.add_handler(AppleCNMSG_handler)
+    if apple_cn_msg_handler_switch:
+        appleCNMSGFilter = AppleCNMSGFilter()
+        AppleCNMSG_handler = MessageHandler(appleCNMSGFilter, apple_cn_msg)
+        application.add_handler(AppleCNMSG_handler)
 
     # what to eat today handler
-    what_to_eat_filter = WhatToEatFilter()
-    what_to_eat_handler = MessageHandler(what_to_eat_filter, what_to_eat)
-    application.add_handler(what_to_eat_handler)
+    if what_to_eat_today_handler_switch:
+        what_to_eat_filter = WhatToEatFilter()
+        what_to_eat_handler = MessageHandler(what_to_eat_filter, what_to_eat)
+        application.add_handler(what_to_eat_handler)
+
+    # group welcome message setting handler
+    group_welcome_msg_handler = CommandHandler('groupwelcome', group_welcome_msg_setting)
+    application.add_handler(group_welcome_msg_handler)
 
     # new user handler
     new_user_verify = NewUserVerify()
@@ -283,9 +432,10 @@ def main():
 
     # this handler must be put after all message handlers
     # xm and fire reaction handler
-    xm_and_fire_reaction_filter = XMAndFireReactionFilter()
-    xm_and_fire_reaction_handler = MessageHandler(xm_and_fire_reaction_filter, xm_and_fire)
-    application.add_handler(xm_and_fire_reaction_handler)
+    if xm_ad_fire_switch:
+        xm_and_fire_reaction_filter = XMAndFireReactionFilter()
+        xm_and_fire_reaction_handler = MessageHandler(xm_and_fire_reaction_filter, xm_and_fire)
+        application.add_handler(xm_and_fire_reaction_handler)
 
     # inline mentioned handler
     application.add_handler(InlineQueryHandler(inline_query))
