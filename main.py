@@ -131,7 +131,7 @@ async def group_welcome_msg_setting(update: Update, context: ContextTypes.DEFAUL
                 group = timer
                 break
         # only group admins can use the following commands
-        if not update.effective_chat.get_member(update.effective_user.id).status in ['administrator', 'creator']:
+        if not (await update.effective_chat.get_member(update.effective_user.id)).status in ['administrator', 'creator']:
             await context.bot.send_message(chat_id=update.effective_chat.id, text="Only group admins can use this command.")
             # command handler in else
         else:
@@ -168,7 +168,8 @@ async def group_welcome_msg_setting(update: Update, context: ContextTypes.DEFAUL
                 await context.bot.send_message(chat_id=update.effective_chat.id, text="Group verify fail message updated.")
                 print("Group verify fail message updated.")
             else:
-                await context.bot.send_message(chat_id=update.effective_chat.id, text="Command not recognized.\nUsage:\n/groupwelcome <on/off>\n/groupwelcome setmessage <message>")
+                # default aka not recognized
+                await context.bot.send_message(chat_id=update.effective_chat.id, text="Usage:\n/groupwelcome <on/off> Toggle group welcome message.\n/groupwelcome setmsg <message> Set group welcome message.\n/groupwelcome verify <on/off> Set group verify.\n/groupwelcome vffilter <regex> Set group verify filter.\n/groupwelcome setvfmsg <message> Set group verify message.\n/groupwelcome setvffailmsg <message> Set group verify fail message.")
 
         # save config file
         if group not in welcome_msg_config:
