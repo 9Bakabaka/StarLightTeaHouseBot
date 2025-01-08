@@ -125,7 +125,7 @@ async def group_welcome_msg_setting(update: Update, context: ContextTypes.DEFAUL
 
         # search for this group in config
         # if not found, use default group config, if found, use the found group config
-        group = {'groupid': update.effective_chat.id, 'welcome': False, 'message': '', 'verify': False, 'verify_filter': '', 'verify_msg': '', 'verify_fail_msg': ''}
+        group = {'groupid': update.effective_chat.id, 'welcome': False, 'message': 'Welcome {new_member_first_name} {new_member_last_name} to the Group!', 'verify': False, 'verify_filter': '.*', 'verify_msg': 'Verification success!', 'verify_fail_msg': 'Verification failed!'}
         for timer in welcome_msg_config:
             if timer['groupid'] == update.effective_chat.id:
                 group = timer
@@ -144,7 +144,7 @@ async def group_welcome_msg_setting(update: Update, context: ContextTypes.DEFAUL
                 await context.bot.send_message(chat_id=update.effective_chat.id, text="Welcome message disabled.")
                 print("Welcome message disabled.")
             elif update.message.text.startswith('/groupwelcome setmsg '):
-                group['message'] = update.message.text.replace('/groupwelcome setmessage ', '')
+                group['message'] = update.message.text.replace('/groupwelcome setmsg ', '')
                 await context.bot.send_message(chat_id=update.effective_chat.id, text="Welcome message updated.")
                 print("Welcome message updated.")
             elif update.message.text.startswith('/groupwelcome verify on'):
@@ -183,25 +183,28 @@ async def group_welcome_msg_setting(update: Update, context: ContextTypes.DEFAUL
 class NewUserVerify:
     # If a new user joins the group, send a welcome message
     WaitingForReply = 1
-    verification_timeout = 30  # seconds
+    verification_timeout = 300  # seconds
     new_user_data = {}
 
     async def send_group_welcome_msg(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         for new_member in update.message.new_chat_members:
-            self.new_user_data[new_member.id] = {'NewUser': True}
-            print(datetime.datetime.now(), "\t", "User_data updated to: ", self.new_user_data)
-            print(datetime.datetime.now(), "\t", "Sending welcome message to new user.")
             # get welcome message text from config
             # open file
             try:
                 with open('welcome_msg_config.json', 'r', encoding='utf-8') as file:
                     welcome_msg_config = json.load(file)
+                if not welcome_msg_config:
+                    welcome_msg_config = [{'groupid': update.effective_chat.id, 'welcome': False, 'message': 'Welcome to the Group!', 'verify': False, 'verify_filter': '.*', 'verify_msg': 'Verification success!', 'verify_fail_msg': 'Verification failed!'}]
             except Exception as e:
-                print(datetime.datetime.now(), "\t", "Error reading welcome_msg_config.json: ", e)
-                await context.bot.send_message(chat_id=update.effective_chat.id, text="Error: " + str(e) + "\nPlease contact the admin.")
+                welcome_msg_config = [{'groupid': update.effective_chat.id, 'welcome': False, 'message': 'Welcome to the Group!', 'verify': False, 'verify_filter': '.*', 'verify_msg': 'Verification success!', 'verify_fail_msg': 'Verification failed!'}]
             # search for this group in config
+            welcome = False
+            verify = False
+            welcome_msg = ""
             for group in welcome_msg_config:
                 if group['groupid'] == update.effective_chat.id:
+                    welcome = group['welcome']
+                    verify = group['verify']
                     welcome_msg = group['message']
                     # reformat welcome message
                     # {new_member_username}, {new_member_first_name}, {and new_member_last_name} is supported
@@ -212,11 +215,20 @@ class NewUserVerify:
                         new_member_last_name=new_member.last_name or ''
                     )
                     break
-
+            # if welcome is disabled, don't run the following code
+            if not welcome:
+                return
+            print(datetime.datetime.now(), "\t", "Sending welcome message to new user.")
             await context.bot.send_message(
                 chat_id=update.effective_chat.id,
                 text=f"{welcome_msg}\n"
             )
+            # if verify is disabled, don't run the following code
+            if not verify:
+                return
+            # add new user to verification list
+            self.new_user_data[new_member.id] = {'NewUser': True}
+            print(datetime.datetime.now(), "\t", "User_data updated to: ", self.new_user_data)
             # set timer for new member
             timer_task = asyncio.create_task(self.verify_timer(new_member.id, update))
             self.new_user_data[new_member.id]['timer_task'] = timer_task
