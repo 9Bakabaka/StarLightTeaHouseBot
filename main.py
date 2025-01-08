@@ -177,7 +177,7 @@ async def group_welcome_msg_setting(update: Update, context: ContextTypes.DEFAUL
         else:
             welcome_msg_config[welcome_msg_config.index(group)] = group
         with open('welcome_msg_config.json', 'w', encoding='utf-8') as file:
-            json.dump(welcome_msg_config, file, indent=4)
+            json.dump(welcome_msg_config, file, ensure_ascii=False, indent=4)
 
 
 class NewUserVerify:
@@ -384,7 +384,7 @@ def main():
     system_status_handler_switch = True
     apple_cn_msg_handler_switch = False
     what_to_eat_today_handler_switch = True
-    xm_ad_fire_switch = True
+    xm_ad_fire_switch = False
 
     # start handler
     if start_handler_switch:
