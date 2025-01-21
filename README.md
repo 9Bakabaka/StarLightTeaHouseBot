@@ -43,6 +43,7 @@ Create a file named "quotes.json" and put quotes like this:
 You can also use EditQuotes.py to edit it with an interface.
 
 ### About 拱火:  
+<span style="color:red">**Do not use this function for now!!! It is not finished yet and unpredictable result may occur!!!**</span>
 A lot of members in StarLight Tea House are doing such thing:  
 Reply a random message with "羡慕" or react it with "🔥".  
 For **every message**, bot would have a probability to do such thing.  
