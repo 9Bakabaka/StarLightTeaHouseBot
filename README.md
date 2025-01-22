@@ -41,6 +41,7 @@ Create a file named "quotes.json" and put quotes like this:
 ]
 ```
 You can also use EditQuotes.py to edit it with an interface.  
+If you want to send your customized quote, @bot and type "\>\>\[your content\]".
 
 ### About 拱火:  
 A lot of members in StarLight Tea House are doing such thing:  
