@@ -247,6 +247,8 @@ class NewUserVerify:
                     {'groupid': update.effective_chat.id, 'welcome': False, 'message': 'Welcome to the Group!',
                      'verify': False, 'verify_filter': '.*', 'verify_msg': 'Verification success!',
                      'verify_fail_msg': 'Verification failed!'}]
+                print(datetime.datetime.now(), "\t", "Error reading welcome_msg_config.json: ", e)
+                await context.bot.send_message(chat_id=update.effective_chat.id, text="Error: " + str(e) + "\nPlease contact the admin.")
             # search for this group in config
             welcome = False
             verify = False
@@ -451,8 +453,12 @@ async def what_to_eat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def inline_query(update: Update, context):
     print(datetime.datetime.now(), "\t", "Calling inlineQuery")
     query = update.inline_query.query.strip()
-    with open('quotes.json', 'r', encoding='utf-8') as f:
-        loadedQuotes = json.load(f)
+    try:
+        with open('quotes.json', 'r', encoding='utf-8') as f:
+            loadedQuotes = json.load(f)
+    except Exception as e:
+        print(datetime.datetime.now(), "\t", "Error reading quotes.json: ", e)
+        return
     # this would read the json everytime the query function called
     # which is not good, improvement will be needed but later
     # or it is good? because internet transfer is much slower than reading a file
@@ -474,6 +480,18 @@ async def inline_query(update: Update, context):
 
             )
         )]
+    # todo: if start with >>, send everything behind as a message
+    if re.match(r'^>>.*', query):
+        output = query[2:]
+        results = [
+            InlineQueryResultArticle(
+                id=str(uuid4()),
+                title=output,
+                description=".*",
+                input_message_content=InputTextMessageContent(output)
+            )
+        ]
+        await update.inline_query.answer(results)
 
     results.extend([
         InlineQueryResultArticle(
