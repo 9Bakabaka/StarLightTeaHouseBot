@@ -67,14 +67,16 @@ class XMAndFireReactionFilter(MessageFilter):
                 if group['groupid'] == message.chat.id:
                     self.possibility = group['possibility']
         except KeyError:  # if not found, set possibility to 0
+            # todo: bug: if a group is not in config, the bot will still reply xm and fire
             self.possibility = 0
-            self.possibility_list[message.chat.id] = 0
+            self.possibility_list[message.chat.id] = {'groupid': message.chat.id, 'possibility': 0, 'enabled': False}
             # save change to file
             with open('xm_and_fire.json', 'w', encoding='utf-8') as file:
                 json.dump(self.possibility_list, file, ensure_ascii=False, indent=4)
             # reload the file
             with open('xm_and_fire.json', 'r', encoding='utf-8') as file:
                 self.possibility_list = json.load(file)
+            return False
 
         # return random_result < self.possibility ? 1 : 0
         return True if random.random() < self.possibility else False
