@@ -40,10 +40,9 @@ Create a file named "quotes.json" and put quotes like this:
     }
 ]
 ```
-You can also use EditQuotes.py to edit it with an interface.
+You can also use EditQuotes.py to edit it with an interface.  
 
 ### About 拱火:  
-<span style="color:red">**Do not use this function for now!!! It is not finished yet and unpredictable result may occur!!!**</span>
 A lot of members in StarLight Tea House are doing such thing:  
 Reply a random message with "羡慕" or react it with "🔥".  
 For **every message**, bot would have a probability to do such thing.  
@@ -52,7 +51,7 @@ Usages (Also try "/xmfire" for usages in chat):
 /xmfire <on/off> Toggle function.  
 /xmfire set <probability> Set probability of triggering the function.  
 When the function is triggered, bot would reply "羡慕"(50%) or react "🔥"(50%) to the message.  
-~~\[Not finished\] If you think the bot is too annoying, you can use /xmfire suppress <minutes> to suppress it temporarily.~~
+~~\[Not finished\] If you think the bot is too annoying, you can use /xmfire suppress <minutes> to suppress it temporarily.~~  
 
 ### About sticker file id query:  
 Send a sticker to bot in pm. It would return the file id.
