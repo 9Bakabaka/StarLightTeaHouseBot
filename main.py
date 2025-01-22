@@ -67,7 +67,6 @@ class XMAndFireReactionFilter(MessageFilter):
                 if group['groupid'] == message.chat.id:
                     self.possibility = group['possibility']
         except KeyError:  # if not found, set possibility to 0
-            # todo: bug: if a group is not in config, the bot will still reply xm and fire
             self.possibility = 0
             self.possibility_list[message.chat.id] = {'groupid': message.chat.id, 'possibility': 0, 'enabled': False}
             # save change to file
@@ -309,7 +308,7 @@ class NewUserVerify:
                 verify_fail_msg = group['verify_fail_msg']
                 break
 
-        if re.match(verify_filter, update.message.text) and user_data.get('NewUser', True):
+        if update.message.text and re.match(verify_filter, update.message.text) and user_data.get('NewUser', True):
             print(datetime.datetime.now(), "\t", "Delete the new user from new_user_data")
             # remove the timer
             timer_task = user_data.get('timer_task')
