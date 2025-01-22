@@ -26,7 +26,6 @@ with open('bottoken', 'r', encoding='utf-8') as file:
 
 
 # todo: silence for x minutes
-# todo: 繁体国行检测开关
 # todo: 尾巴触电
 # todo: add quote, print quote list and delete quote
 # todo: verification timeout customize
@@ -224,7 +223,7 @@ async def group_welcome_msg_settings(update: Update, context: ContextTypes.DEFAU
         with open('welcome_msg_config.json', 'w', encoding='utf-8') as file:
             json.dump(welcome_msg_config, file, ensure_ascii=False, indent=4)
 
-# todo: what if the user send a picture or sticker instead of text?
+
 class NewUserVerify:
     # If a new user joins the group, send a welcome message
     WaitingForReply = 1
