@@ -435,12 +435,14 @@ async def xm_and_fire_settings(update: Update, context: ContextTypes.DEFAULT_TYP
 
 # manual xm and fire handlers
 async def manual_xm(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print(datetime.datetime.now(), "\t", "Received " + update.message.text + ", ", end="")
     if not update.message.reply_to_message:
         await context.bot.send_message(chat_id=update.effective_chat.id, text="Reply to a message to use this function.")
     else:   # reply update.message
         await update.message.reply_to_message.reply_text('羡慕')
 
 async def manual_fire(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print(datetime.datetime.now(), "\t", "Received " + update.message.text + ", ", end="")
     if not update.message.reply_to_message:
         await context.bot.send_message(chat_id=update.effective_chat.id, text="Reply to a message to use this function.")
     else:
