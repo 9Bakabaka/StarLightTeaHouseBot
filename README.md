@@ -52,7 +52,7 @@ Usages (Also try "/xmfire" for usages in chat):
 /xmfire <on/off> Toggle function.  
 /xmfire set <probability> Set probability of triggering the function.  
 When the function is triggered, bot would reply "羡慕"(50%) or react "🔥"(50%) to the message.  
-Now manual 羡慕 and fire reaction are also supported. Reply a message with /xm or /fire to trigger the function.  
+Now manual 羡慕 and fire reaction are also supported. Use /xm <message link> or /fire <message link>. Or just reply /xm or /fire to the message. 
 ~~\[Not finished\] If you think the bot is too annoying, you can use /xmfire suppress <minutes> to suppress it temporarily.~~  
 
 ### About sticker file id query:  
