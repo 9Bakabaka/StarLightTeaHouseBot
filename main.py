@@ -14,7 +14,7 @@ from functools import partial
 
 from telegram import Update, InlineQueryResultArticle, InputTextMessageContent, InlineQueryResultCachedSticker
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, ConversationHandler, filters, \
-    InlineQueryHandler
+    InlineQueryHandler, CallbackContext
 from telegram.ext.filters import MessageFilter
 
 import notifyAdmin
@@ -85,8 +85,7 @@ class WhatToEatFilter(MessageFilter):
         if message.text:
             if '/eattoday' in message.text:
                 return 1
-            if (
-                    '今天吃什么' or '等会吃什么' or '早上吃什么' or '中午吃什么' or '下午吃什么' or '晚上吃什么' or '饿了' or '好饿' or '饿' or '饿饿') in message.text:
+            if ('今天吃什么' or '等会吃什么' or '早上吃什么' or '中午吃什么' or '下午吃什么' or '晚上吃什么' or '饿了' or '好饿' or '饿' or '饿饿') in message.text:
                 return 1
 
 
@@ -136,6 +135,7 @@ async def system_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # group welcome message setting handler
 async def group_welcome_msg_settings(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(datetime.datetime.now(), "\t", "Received " + update.message.text + ", ", end="")
+    usage_msg = "Usage:\n/groupwelcome <on/off> Toggle group welcome message.\n/groupwelcome setmsg <message> Set group welcome message.\n/groupwelcome verify <on/off> Toggle group verify.\n/groupwelcome vffilter <regex> Set group verify filter.\n/groupwelcome setvfmsg <message> Set group verify message.\n/groupwelcome setvffailmsg <message> Set group verify fail message."
     if update.effective_chat.type not in ['group', 'supergroup']:
         await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text="This command is only available in group.")
@@ -144,7 +144,7 @@ async def group_welcome_msg_settings(update: Update, context: ContextTypes.DEFAU
     # if only /groupwelcome, show usage
     if update.message.text == '/groupwelcome':
         await context.bot.send_message(chat_id=update.effective_chat.id,
-                                       text="Usage:\n/groupwelcome <on/off> Toggle group welcome message.\n/groupwelcome setmsg <message> Set group welcome message.\n/groupwelcome verify <on/off> Toggle group verify.\n/groupwelcome vffilter <regex> Set group verify filter.\n/groupwelcome setvfmsg <message> Set group verify message.\n/groupwelcome setvffailmsg <message> Set group verify fail message.")
+                                       text=usage_msg)
         print("Showing usage")
     else:
         # only group admins can change the settings
@@ -212,7 +212,7 @@ async def group_welcome_msg_settings(update: Update, context: ContextTypes.DEFAU
         else:
             # default aka not recognized
             await context.bot.send_message(chat_id=update.effective_chat.id,
-                                           text="Usage:\n/groupwelcome <on/off> Toggle group welcome message.\n/groupwelcome setmsg <message> Set group welcome message.\n/groupwelcome verify <on/off> Set group verify.\n/groupwelcome vffilter <regex> Set group verify filter.\n/groupwelcome setvfmsg <message> Set group verify message.\n/groupwelcome setvffailmsg <message> Set group verify fail message.")
+                                           text=usage_msg)
 
         # save config file
         if group not in welcome_msg_config:
@@ -369,6 +369,7 @@ async def xm_and_fire(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # form security aspect, this is not good and may cause data leak, but I don't want to fix it
 async def xm_and_fire_settings(update: Update, context: ContextTypes.DEFAULT_TYPE, xm_and_fire_filter_obj):
     print(datetime.datetime.now(), "\t", "Received " + update.message.text + ", ", end="")
+    usage_msg = "Usage:\n/xmfire <on/off> Toggle xm and fire reaction.\n/xmfire set <possibility> Set xm and fire possibility in [0, 1].\n/xmfire suppress <minutes> Suppress this function for a period of time. (Not Finished Yet)"
     if update.effective_chat.type not in ['group', 'supergroup']:
         await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text="This command is only available in group.")
@@ -377,7 +378,7 @@ async def xm_and_fire_settings(update: Update, context: ContextTypes.DEFAULT_TYP
     # if only /xmfire, show usage
     if update.message.text == '/xmfire':
         await context.bot.send_message(chat_id=update.effective_chat.id,
-                                       text="Usage:\n/xmfire <on/off> Toggle xm and fire reaction.\n/xmfire set <possibility> Set xm and fire possibility in [0, 1].\n/xmfire suppress <minutes> Suppress this function for a period of time. (Not Finished Yet)")
+                                       text=usage_msg)
         print("Showing usage")
     else:
         # only group admins can change the settings
@@ -418,7 +419,7 @@ async def xm_and_fire_settings(update: Update, context: ContextTypes.DEFAULT_TYP
         else:
             # default aka not recognized
             await context.bot.send_message(chat_id=update.effective_chat.id,
-                                           text="Usage:\n/xmfire <on/off> Toggle xm and fire reaction.\n/xmfire set <possibility> Set xm and fire possibility in [0, 1].")
+                                           text=usage_msg)
 
         # save changes to list
         if group not in xm_and_fire_possibilities:
@@ -432,20 +433,36 @@ async def xm_and_fire_settings(update: Update, context: ContextTypes.DEFAULT_TYP
         # reload config file
         xm_and_fire_filter_obj.reload_config()
 
+# manual xm and fire handlers
+async def manual_xm(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.message.reply_to_message:
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="Reply to a message to use this function.")
+    else:
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="羡慕")
+
+async def manual_fire(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.message.reply_to_message:
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="Reply to a message to use this function.")
+    else:
+        await context.bot.set_message_reaction(update.effective_chat.id, update.message.reply_to_message.message_id, '🔥')
 
 # random reply a kind of food when calling /eattoday
 async def what_to_eat(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print(datetime.datetime.now(), "\t", "What to eat today called.")
     # 5% chance trigger I EAT MYSELF
     chance_I_EAT_MYSELF = 0.05
     if random.random() < chance_I_EAT_MYSELF:
-        print(datetime.datetime.now(), "\t", "What to eat today called.")
         await update.message.reply_text(
             "吃" + update.message.from_user.first_name + update.message.from_user.last_name + "！")
     else:
         # food = ['麻辣烫', '炒饭', '炒面', '炒粉', '炒河粉', '炒米粉', '炒土豆丝', '炒青菜', '炒西兰花', '炒芹菜', '炒莴笋', '炒豆角', '炒茄子']
-        with open('foodlist.txt', 'r', encoding='utf-8') as food_list_file:
-            food = [line.strip() for line in food_list_file.readlines()]
-        print(datetime.datetime.now(), "\t", "What to eat today called.")
+        try:
+            with open('foodlist.txt', 'r', encoding='utf-8') as food_list_file:
+                food = [line.strip() for line in food_list_file.readlines()]
+        except Exception as e:
+            print(datetime.datetime.now(), "\t", "Error reading foodlist.txt: ", e)
+            await update.message.reply_text("Error: " + str(e) + "\nPlease contact the admin.")
+
         await update.message.reply_text("吃" + random.choice(food) + "！")
 
 
@@ -554,7 +571,12 @@ def main():
         entry_points=[MessageHandler(newUserFilter, new_user_verify.send_group_welcome_msg)],
         states={
             new_user_verify.WaitingForReply: [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, new_user_verify.verify_twitter_user_name)]
+                MessageHandler(
+                    # if ((text && not command) || sticker || photo || animation)
+                    (filters.TEXT & ~filters.COMMAND) | filters.Sticker.ALL | filters.PHOTO | filters.ANIMATION,
+                    # call verify_twitter_user_name
+                    new_user_verify.verify_twitter_user_name
+                )]
         },
         fallbacks=[]
     )
@@ -568,6 +590,12 @@ def main():
     # pass the object to settings function
     xm_and_fire_settings_handler = CommandHandler('xmfire', partial(xm_and_fire_settings, xm_and_fire_filter_obj=xm_and_fire_reaction_filter))
     application.add_handler(xm_and_fire_settings_handler)
+
+    # manual xm and fire handlers
+    manual_xm_handler = CommandHandler('xm', manual_xm)
+    application.add_handler(manual_xm_handler)
+    manual_fire_handler = CommandHandler('fire', manual_fire)
+    application.add_handler(manual_fire_handler)
 
     # xm and fire reaction handler
     # this handler must be put after all message handlers
