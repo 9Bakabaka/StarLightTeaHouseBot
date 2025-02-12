@@ -435,18 +435,43 @@ async def xm_and_fire_settings(update: Update, context: ContextTypes.DEFAULT_TYP
 
 # manual xm and fire handlers
 async def manual_xm(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    print(datetime.datetime.now(), "\t", "Received " + update.message.text)
-    if not update.message.reply_to_message:
-        await context.bot.send_message(chat_id=update.effective_chat.id, text="Reply to a message to use this function.")
-    else:   # reply update.message
+    print(datetime.datetime.now(), "\t", "Received " + update.message.text + ", ", end="")
+    if update.message.reply_to_message:
         await update.message.reply_to_message.reply_text('羡慕')
+    else:
+        if not re.match(r'^/xm https://t\.me/c/(\d+)/(\d+)$', update.message.text):
+            await context.bot.send_message(chat_id=update.effective_chat.id, text="Usage: /xm <message link>")
+            print("Showing usage")
+            return
+        else:
+            try:
+                message_id = int(re.match(r'^/xm https://t\.me/c/(\d+)/(\d+)$', update.message.text).group(2))
+                await context.bot.send_message(text='羡慕', chat_id=update.effective_chat.id, reply_to_message_id=message_id)
+                print("Replying 羡慕")
+            except Exception as e:
+                print("Error: ", e)
+                await context.bot.send_message(chat_id=update.effective_chat.id, text="Error: " + str(e))
+
 
 async def manual_fire(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    print(datetime.datetime.now(), "\t", "Received " + update.message.text)
-    if not update.message.reply_to_message:
-        await context.bot.send_message(chat_id=update.effective_chat.id, text="Reply to a message to use this function.")
+    print(datetime.datetime.now(), "\t", "Received " + update.message.text + ", ", end="")
+    if update.message.reply_to_message:
+        await context.bot.set_message_reaction(chat_id=update.effective_chat.id, message_id=update.message.reply_to_message.message_id, reaction='🔥')
+        print("Reacting 🔥")
     else:
-        await context.bot.set_message_reaction(update.effective_chat.id, update.message.reply_to_message.message_id, '🔥')
+        if not re.match(r'^/fire https://t\.me/c/(\d+)/(\d+)$', update.message.text):
+            await context.bot.send_message(chat_id=update.effective_chat.id, text="Usage: /xm <message link>")
+            print("Showing usage")
+            return
+        else:
+            try:
+                message_id = int(re.match(r'^/fire https://t\.me/c/(\d+)/(\d+)$', update.message.text).group(2))
+                message_id = int(re.match(r'^/fire https://t\.me/c/(\d+)/(\d+)$', update.message.text).group(2))
+                await context.bot.set_message_reaction(chat_id=update.effective_chat.id, message_id=message_id, reaction='🔥')
+                print("Reacting 🔥")
+            except Exception as e:
+                print("Error: ", e)
+                await context.bot.send_message(chat_id=update.effective_chat.id, text="Error: " + str(e))
 
 # random reply a kind of food when calling /eattoday
 async def what_to_eat(update: Update, context: ContextTypes.DEFAULT_TYPE):
