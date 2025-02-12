@@ -461,7 +461,7 @@ async def manual_fire(update: Update, context: ContextTypes.DEFAULT_TYPE):
         print("Reacting 🔥")
     else:
         if not re.match(r'^/fire https://t\.me/c/(\d+)/(\d+)$', update.message.text):
-            await context.bot.send_message(chat_id=update.effective_chat.id, text="Usage: /xm <message link>")
+            await context.bot.send_message(chat_id=update.effective_chat.id, text="Usage: /fire <message link>")
             print("Showing usage")
             return
         else:
@@ -535,7 +535,11 @@ async def inline_query(update: Update, context):
                 input_message_content=InputTextMessageContent(output)
             )
         ]
-        await update.inline_query.answer(results)
+        try:
+            await update.inline_query.answer(results)
+        except Exception as e:
+            # do nothing, it's not a bug. Inline query is triggered rapidly when you type custom message.
+            print("Inline query triggered too fast: ", e)
 
     results.extend([
         InlineQueryResultArticle(
