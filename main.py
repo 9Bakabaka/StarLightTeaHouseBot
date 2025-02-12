@@ -438,6 +438,7 @@ async def manual_xm(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(datetime.datetime.now(), "\t", "Received " + update.message.text + ", ", end="")
     if update.message.reply_to_message:
         await update.message.reply_to_message.reply_text('羡慕')
+        print("Replying 羡慕")
     else:
         if not re.match(r'^/xm https://t\.me/c/(\d+)/(\d+)$', update.message.text):
             await context.bot.send_message(chat_id=update.effective_chat.id, text="Usage: /xm <message link>")
@@ -465,7 +466,6 @@ async def manual_fire(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
         else:
             try:
-                message_id = int(re.match(r'^/fire https://t\.me/c/(\d+)/(\d+)$', update.message.text).group(2))
                 message_id = int(re.match(r'^/fire https://t\.me/c/(\d+)/(\d+)$', update.message.text).group(2))
                 await context.bot.set_message_reaction(chat_id=update.effective_chat.id, message_id=message_id, reaction='🔥')
                 print("Reacting 🔥")
