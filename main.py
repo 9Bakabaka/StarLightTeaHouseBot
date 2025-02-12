@@ -550,7 +550,11 @@ async def inline_query(update: Update, context):
         )
         for quote in filtered_quotes
     ])
-    await update.inline_query.answer(results)
+    try:
+        await update.inline_query.answer(results)
+    except Exception as e:
+        # do nothing, it's not a bug. Inline query is triggered rapidly when you type custom message.
+        print("Inline query triggered too fast: ", e)
 
 
 def main():
