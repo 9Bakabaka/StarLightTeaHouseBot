@@ -85,7 +85,7 @@ class WhatToEatFilter(MessageFilter):
         if message.text:
             if '/eattoday' in message.text:
                 return 1
-            if ('今天吃什么' or '等会吃什么' or '早上吃什么' or '中午吃什么' or '下午吃什么' or '晚上吃什么' or '饿了' or '好饿' or '饿' or '饿饿') in message.text:
+            if re.search(r'今天吃什么|等会吃什么|早上吃什么|中午吃什么|下午吃什么|晚上吃什么|饿了|好饿|饿饿', message.text):
                 return 1
 
 
@@ -453,7 +453,6 @@ async def manual_xm(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 print("Error: ", e)
                 await context.bot.send_message(chat_id=update.effective_chat.id, text="Error: " + str(e))
 
-
 async def manual_fire(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(datetime.datetime.now(), "\t", "Received " + update.message.text + ", ", end="")
     if update.message.reply_to_message:
@@ -491,7 +490,6 @@ async def what_to_eat(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("Error: " + str(e) + "\nPlease contact the admin.")
 
         await update.message.reply_text("吃" + random.choice(food) + "！")
-
 
 # when bot mentioned inline, reply with quote
 async def inline_query(update: Update, context):
