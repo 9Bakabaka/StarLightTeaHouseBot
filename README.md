@@ -5,15 +5,15 @@ This is a telegram bot developed for StarLight Tea house.
 ### Most of the functions can be toggled in main()
 
 ### About Bot Token:
-Create a file named "bottoken" at the same folder as the script and put your token in it.
+Create a text file named "bottoken" at the same folder as the script and put your token in it.
 
 ### About Status
 Use command "/status" to check server status. Including CPU, memory usage and network latency.
 
 ### About welcome message:  
 Bot would send a **welcome message** to any new user entered the group chat.  
-Use "/groupwelcome <parameter>" to set welcome message, filter and verification message. Only group admins can change these settings.  
-Usages (Also try "/groupwelcome" for usages in chat):
+Use "/groupwelcome \<parameter\>" to set welcome message, filter and verification message. Only group admins can change these settings.  
+Usages (Also try "/groupwelcome" for usages in chat):  
 /groupwelcome <on/off> Toggle group welcome message.  
 /groupwelcome setmsg <message> Set group welcome message.  
 /groupwelcome verify <on/off> Toggle group verify.  
@@ -41,7 +41,7 @@ Create a file named "quotes.json" and put quotes like this:
 ]
 ```
 You can also use EditQuotes.py to edit it with an interface.  
-If you want to send your customized quote, @bot and type "\>\>\[your content\]".
+If you want to send your customized quote, @bot and type "\>\>\[your content\]". In this way you can send any text "via bot".
 
 ### About 拱火:  
 A lot of members in StarLight Tea House are doing such thing:  
@@ -52,7 +52,7 @@ Usages (Also try "/xmfire" for usages in chat):
 /xmfire <on/off> Toggle function.  
 /xmfire set <probability> Set probability of triggering the function.  
 When the function is triggered, bot would reply "羡慕"(50%) or react "🔥"(50%) to the message.  
-Now manual 羡慕 and fire reaction are also supported. Use /xm <message link> or /fire <message link>. Or just reply /xm or /fire to the message. 
+Manual 羡慕 and fire reaction are also supported. Use /xm \<message link\> or /fire \<message link\>. Or just reply /xm or /fire to the message.  
 ~~\[Not finished\] If you think the bot is too annoying, you can use /xmfire suppress <minutes> to suppress it temporarily.~~  
 
 ### About sticker file id query:  
