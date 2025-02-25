@@ -41,6 +41,7 @@ class AppleCNMSGFilter(MessageFilter):
 class XMAndFireReactionFilter(MessageFilter):
     # get possibility from the global array xm_and_fire_possibility
     # define before use, typical c++ style, aha-aha
+    enabled = 0
     possibility = 0
     possibility_list = None
 
@@ -64,6 +65,7 @@ class XMAndFireReactionFilter(MessageFilter):
         try:
             for group in self.possibility_list:
                 if group['groupid'] == message.chat.id:
+                    self.enabled = group['enabled']
                     self.possibility = group['possibility']
         except KeyError:  # if not found, set possibility to 0
             self.possibility = 0
@@ -76,6 +78,9 @@ class XMAndFireReactionFilter(MessageFilter):
                 self.possibility_list = json.load(file)
             return False
 
+        # if not enabled, return False
+        if not self.enabled:
+            return False
         # return random_result < self.possibility ? 1 : 0
         return True if random.random() < self.possibility else False
 
