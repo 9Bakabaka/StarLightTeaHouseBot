@@ -344,8 +344,8 @@ class NewUserVerify:
         if new_member_id in self.new_user_data:
             # put your custom methods here
             # for example, I will call notify_admin from notifyAdmin.py
-            print(datetime.datetime.now(), "\t", "User verification timeout.")
-            notifyAdmin.notify_admin(context, f"User {new_member_id} has not verified their account in time.")
+            print(datetime.datetime.now(), "\t", f"User {new_member_id} has not verified their account in time.")
+            # notifyAdmin.notify_admin(context, f"User {new_member_id} has not verified their account in time.")
             timer_task = user_data.get('timer_task')
             if timer_task:
                 timer_task.cancel()
@@ -441,12 +441,13 @@ async def xm_and_fire_settings(update: Update, context: ContextTypes.DEFAULT_TYP
 # manual xm and fire handlers
 async def manual_xm(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(datetime.datetime.now(), "\t", "Received " + update.message.text + ", ", end="")
+    usage_msg = "Usage: /xm <message link>\nOr reply a message with /xm."
     if update.message.reply_to_message:
         await update.message.reply_to_message.reply_text('羡慕')
         print("Replying 羡慕")
     else:
         if not re.match(r'^/xm https://t\.me/c/(\d+)/(\d+)$', update.message.text):
-            await context.bot.send_message(chat_id=update.effective_chat.id, text="Usage: /xm <message link>")
+            await context.bot.send_message(chat_id=update.effective_chat.id, text=usage_msg)
             print("Showing usage")
             return
         else:
@@ -460,12 +461,13 @@ async def manual_xm(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def manual_fire(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(datetime.datetime.now(), "\t", "Received " + update.message.text + ", ", end="")
+    usage_msg = "Usage: /fire <message link>\nOr reply a message with /fire."
     if update.message.reply_to_message:
         await context.bot.set_message_reaction(chat_id=update.effective_chat.id, message_id=update.message.reply_to_message.message_id, reaction='🔥')
         print("Reacting 🔥")
     else:
         if not re.match(r'^/fire https://t\.me/c/(\d+)/(\d+)$', update.message.text):
-            await context.bot.send_message(chat_id=update.effective_chat.id, text="Usage: /fire <message link>")
+            await context.bot.send_message(chat_id=update.effective_chat.id, text=usage_msg)
             print("Showing usage")
             return
         else:
