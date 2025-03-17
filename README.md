@@ -25,7 +25,7 @@ Usages (Also try "/groupwelcome" for usages in chat):
 In **welcome message**, you can use {new_member_username}, {new_member_first_name} and {and new_member_last_name} in the message.  
 Verify message would be sent if verify is enabled.  
 After the new user send a message matches the filter by regex, then the bot will send **verify message**.  
-If the new user doesn't send it, bot would notify group admin. (Define your own method in NewUserVerify.verify_timer())  
+If the new user doesn't send it, bot would notify group admin. (Define your own method in notifyAdmin.notify_admin())  
 All welcome messages and settings are stored in welcome_msg_config.json.  
 
 ### About quotes:

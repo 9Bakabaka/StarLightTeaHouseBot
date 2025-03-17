@@ -1,11 +1,9 @@
 ### By Longtail Amethyst Eralbrunia 2024-09-26
 ### Stop posting your shit to Internet
 import json
-import time
 import datetime
 import asyncio
 import re
-from lib2to3.fixes.fix_input import context
 from uuid import uuid4
 import random
 import psutil
@@ -341,10 +339,10 @@ class NewUserVerify:
         userID = update.message.from_user.id
         user_data = self.new_user_data.get(userID, {})
         if new_member_id in self.new_user_data:
+            print(datetime.datetime.now(), "\t", f"User {new_member_id} has not verified their account in time.")
             # put your custom methods here
             # for example, I will call notify_admin from notifyAdmin.py
-            print(datetime.datetime.now(), "\t", f"User {new_member_id} has not verified their account in time.")
-            # notifyAdmin.notify_admin(context, f"User {new_member_id} has not verified their account in time.")
+            # notifyAdmin.notify_admin()
             timer_task = user_data.get('timer_task')
             if timer_task:
                 timer_task.cancel()
