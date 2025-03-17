@@ -5,6 +5,7 @@
 
 - 大多数功能可以在 main() 中切换  
 - 在 bottoken 文件中写入您的Bot Token  
+- 用docker部署时，添加新功能请自行修改 Dockerfile 和 docker-compose.yml
 
 ## 使用 docker-compose 部署
 
