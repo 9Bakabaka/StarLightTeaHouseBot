@@ -1,18 +1,62 @@
 # StarLightTeaHouseBot
-这是为StarLight茶馆开发的一个telegram机器人。
+这是为星星小茶馆✨开发的一个telegram机器人。
 
 [README](README.md) | [中文文档](README_zh.md)  
 
-# 使用方法：
-### 大多数功能可以在main()中切换
+---
+## 部署 Bot：  
 
-### 关于Bot Token：
-在与脚本相同的文件夹中创建一个名为"bottoken"的文本文件，并将您的Token放入其中。
+- 大多数功能可以在 main() 中切换  
+- 在 bottoken 文件中写入您的Bot Token  
 
-### 关于状态：
+### 使用 docker-compose 部署  
+
+---  
+
+1.  按照本指南在您的服务器上安装 docker：  
+
+    https://docs.docker.com/engine/install/
+2.  按照本指南在您的服务器上安装 docker-compose：  
+
+    https://docs.docker.com/compose/install/
+3. 使用以下命令克隆库到本地并进入目录：  
+    ```bash  
+    git clone https://github.com/LTLAE/StarLightTeaHouseBot.git
+    cd StarLightTeaHouseBot
+    ```
+4. 将您的Bot Token写入 bottoken 文件中
+5. 使用以下命令构建并启动容器：  
+    ```bash  
+    docker-compose up -d
+    ```  
+
+### 使用 Python 部署  
+
+---  
+
+1. 确保您的服务器已经安装了 Python 3.10 或更高版本。
+2. 使用以下命令克隆库到本地并进入目录：  
+    ```bash  
+    git clone https://github.com/LTLAE/StarLightTeaHouseBot.git
+    cd StarLightTeaHouseBot
+    ```  
+3. 将您的Bot Token写入 bottoken 文件中
+4. 安装依赖：  
+    ```bash  
+    pip install -r requirements.txt
+    ```
+5. 运行Bot：  
+    ```bash
+    python3 main.py
+    ```
+   
+---
+## 功能：
+
+### 1. 查看服务器状态：
 使用命令"/status"检查服务器状态，包括CPU、内存使用情况和网络延迟。
 
-### 关于欢迎信息：
+### 2. 发送欢迎信息：
 Bot会向任何进入群聊的新用户发送**欢迎信息**。
 使用"/groupwelcome \<参数\>"设置欢迎信息、过滤器和验证信息。只有群管理员可以更改这些设置。
 使用方法（也可以在聊天中尝试"/groupwelcome"查看使用方式）：
@@ -28,7 +72,7 @@ Bot会向任何进入群聊的新用户发送**欢迎信息**。
 如果新用户没有发送符合要求的消息，机器人会通知群管理员。（可以在 notifyAdmin.notify_admin() 中定义您自己的方法）
 所有欢迎消息和设置都存储在 welcome_msg_config.json 文件中。
 
-### 关于名言：
+### 3. 发送名言：
 创建一个名为"quotes.json"的文件，并按以下格式添加名言：
 ```json
 [
@@ -45,8 +89,8 @@ Bot会向任何进入群聊的新用户发送**欢迎信息**。
 您也可以使用EditQuotes.py通过界面进行编辑。
 如果您想发送自定义的名言，可以@bot并输入"\>\>[您的内容]"。通过这种方式，您可以通过Bot发送任何文本。
 
-### 关于拱火：
-StarLight茶馆的很多成员做这样一件事：
+### 4. 拱火：
+星星小茶馆✨的很多成员做这样一件事：
 用"羡慕"回复随机消息或用"🔥"进行反应。
 对于**每一条消息**，Bot都有概率进行这种操作。
 使用"/xmfire <参数>"配置此功能。
@@ -57,10 +101,12 @@ StarLight茶馆的很多成员做这样一件事：
 也支持手动进行羡慕和"🔥"回复。使用/xm \<消息链接\> 或 /fire \<消息链接\>。或者直接回复/xm或/fire到消息中。
 ~~\[未完成\]如果您觉得Bot太烦人，您可以使用/xmfire suppress <分钟>来暂时压制它。~~
 
-### 关于贴纸文件ID查询：
+### 5.贴纸文件ID查询：
 将贴纸发送到Bot的私聊中，它会返回文件ID。
 
-### 关于今天吃什么：
+### 6.今天吃什么（roll 饭）：
 将食物名称放入名为"foodlist.txt"的文件中，每行一个食物名称。
 当触发"/eattoday"或消息包含类似"今天吃什么"的内容时，Bot会从列表中随机选择一个食物名称。
-彩蛋：5%的概率选择"自己"（发送者的名字）。
+彩蛋：5%的概率选择"自己"（发送者的名字）。  
+
+---
