@@ -15,6 +15,7 @@ from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, Messa
     InlineQueryHandler, CallbackContext
 from telegram.ext.filters import MessageFilter
 
+import notifyAdmin
 
 # import token from file
 with open('bottoken', 'r', encoding='utf-8') as file:
@@ -339,10 +340,10 @@ class NewUserVerify:
         userID = update.message.from_user.id
         user_data = self.new_user_data.get(userID, {})
         if new_member_id in self.new_user_data:
+            print(datetime.datetime.now(), "\t", f"User {new_member_id} has not verified their account in time.")
             # put your custom methods here
             # for example, I will call notify_admin from notifyAdmin.py
-            print(datetime.datetime.now(), "\t", f"User {new_member_id} has not verified their account in time.")
-            # notifyAdmin.notify_admin(context, f"User {new_member_id} has not verified their account in time.")
+            # notifyAdmin.notify_admin()
             timer_task = user_data.get('timer_task')
             if timer_task:
                 timer_task.cancel()
