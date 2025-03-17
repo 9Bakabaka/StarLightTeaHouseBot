@@ -1,11 +1,9 @@
 ### By Longtail Amethyst Eralbrunia 2024-09-26
 ### Stop posting your shit to Internet
 import json
-import time
 import datetime
 import asyncio
 import re
-from lib2to3.fixes.fix_input import context
 from uuid import uuid4
 import random
 import psutil
@@ -17,7 +15,6 @@ from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, Messa
     InlineQueryHandler, CallbackContext
 from telegram.ext.filters import MessageFilter
 
-import notifyAdmin
 
 # import token from file
 with open('bottoken', 'r', encoding='utf-8') as file:
