@@ -22,11 +22,11 @@ Bot会向任何进入群聊的新用户发送**欢迎信息**。
 /groupwelcome vffilter <正则表达式> 设置群验证过滤器。  
 /groupwelcome setvfmsg <消息> 设置群验证信息。  
 /groupwelcome setvffailmsg <消息> 设置群验证失败信息。  
-在**欢迎信息**中，您可以使用{new_member_username}、{new_member_first_name}和{new_member_last_name}来表示新成员的用户名、名字和姓氏。
-如果启用了验证信息，验证信息会被发送。
-当新用户发送的消息匹配正则过滤器时，Bot将发送**验证信息**。
-如果新用户没有发送消息，Bot会通知群管理员。（您可以在NewUserVerify.verify_timer()中定义自己的处理方式）
-所有的欢迎信息和设置都存储在welcome_msg_config.json中。
+在**欢迎消息**中，您可以使用 {new_member_username}、{new_member_first_name} 和 {new_member_last_name} 来构建消息。
+如果启用了验证，将会发送验证消息。
+当新用户发送符合正则表达式的消息时，机器人将发送**验证消息**。
+如果新用户没有发送符合要求的消息，机器人会通知群管理员。（可以在 notifyAdmin.notify_admin() 中定义您自己的方法）
+所有欢迎消息和设置都存储在 welcome_msg_config.json 文件中。
 
 ### 关于名言：
 创建一个名为"quotes.json"的文件，并按以下格式添加名言：

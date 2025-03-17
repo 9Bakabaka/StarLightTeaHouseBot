@@ -16,6 +16,7 @@ WORKDIR /app
 
 # 复制 main.py 到镜像中的 /app 目录
 COPY ./main.py /app/main.py
+COPY ./notifyAdmin.py /app/notifyAdmin.py
 COPY ./docker_requirements.txt /app/requirements.txt
 COPY ./bottoken /app/bottoken
 
