@@ -3,15 +3,10 @@
 
 [README](README.md) | [中文文档](README_zh.md)  
 
----
-## 部署 Bot：  
-
 - 大多数功能可以在 main() 中切换  
 - 在 bottoken 文件中写入您的Bot Token  
 
-### 使用 docker-compose 部署  
-
----  
+## 使用 docker-compose 部署
 
 1.  按照本指南在您的服务器上安装 docker：  
 
@@ -30,9 +25,7 @@
     docker-compose up -d
     ```  
 
-### 使用 Python 部署  
-
----  
+## 使用 Python 部署
 
 1. 确保您的服务器已经安装了 Python 3.10 或更高版本。
 2. 使用以下命令克隆库到本地并进入目录：  
@@ -49,8 +42,7 @@
     ```bash
     python3 main.py
     ```
-   
----
+
 ## 功能：
 
 ### 1. 查看服务器状态：
