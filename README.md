@@ -1,6 +1,8 @@
 # StarLightTeaHouseBot
 This is a telegram bot developed for StarLight Tea house.  
 
+[README](README.md) | [中文文档](README_zh.md)  
+
 # Usage:  
 ### Most of the functions can be toggled in main()
 

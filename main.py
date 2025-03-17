@@ -17,7 +17,6 @@ from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, Messa
     InlineQueryHandler, CallbackContext
 from telegram.ext.filters import MessageFilter
 
-import notifyAdmin
 
 # import token from file
 with open('bottoken', 'r', encoding='utf-8') as file:
