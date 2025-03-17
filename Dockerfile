@@ -18,7 +18,6 @@ WORKDIR /app
 COPY ./main.py /app/main.py
 COPY ./notifyAdmin.py /app/notifyAdmin.py
 COPY ./docker_requirements.txt /app/requirements.txt
-COPY ./bottoken /app/bottoken
 
 # 创建并激活虚拟环境
 RUN python3 -m venv /venv
