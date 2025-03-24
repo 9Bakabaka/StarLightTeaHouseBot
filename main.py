@@ -10,6 +10,7 @@ import psutil
 import telegram.error
 from ping3 import ping
 from functools import partial
+import os
 
 from telegram import Update, InlineQueryResultArticle, InputTextMessageContent, InlineQueryResultCachedSticker
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, ConversationHandler, filters, \
@@ -624,6 +625,8 @@ def main():
 
     # jm comic handler
     if jm_download:
+        # empty download folder
+        os.remove('download')
         jm_comic_handler = CommandHandler('jm', jm_comic)
         application.add_handler(jm_comic_handler)
 
