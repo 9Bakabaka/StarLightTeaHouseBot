@@ -32,7 +32,10 @@ def convert_image_folder_to_pdf(directory, pdf_name=None):
             os.chmod(f"{pdf_name}.pdf", 0o777)
 
 
-def download(comic_id):
+def download_comic(comic_id):
+    # if download folder does not exist, create it
+    if not os.path.exists(temp_download_path):
+        os.mkdir(temp_download_path)
     # clear download folder
     for file in os.listdir(temp_download_path):
         os.remove(os.path.join(temp_download_path, file))
@@ -60,19 +63,6 @@ def download(comic_id):
             os.remove(os.path.join(temp_download_path, file))
     return f"{comic_id}.pdf"
 
-def search_cache(comic_id):
-    # search cache
-    for file in os.listdir(temp_download_path):
-        if file.endswith(".pdf") and file.startswith(str(comic_id)):
-            return file
-    return None
-
-def download_comic(comic_id):
-    pdf_file = search_cache(comic_id)
-    if pdf_file is None:
-        pdf_file = download(comic_id)
-    return pdf_file
-
 
 # for test only
-download_comic(422866)
+# download_comic(422866)
