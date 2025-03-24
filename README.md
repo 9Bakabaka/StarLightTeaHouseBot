@@ -64,3 +64,6 @@ Send a sticker to bot in pm. It would return the file id.
 Put food names in a file named "foodlist.txt", one food name per line.
 When triggered "/eattoday" or message contain words like "今天吃什么", bot would randomly choose one food name from the list.  
 Easter egg: 5% chance eat "themselves"(sender's name)
+
+### About jm comic download:
+Use "/jmcomic \<comic name\>" to download jm comic.
