@@ -20,6 +20,7 @@ from telegram.ext.filters import MessageFilter
 
 import notifyAdmin
 from download_jm_pdf import download_comic
+from LLM import fetch_from_AI
 
 # import token from file
 with open('bottoken', 'r', encoding='utf-8') as file:
@@ -585,6 +586,26 @@ async def jm_comic_download(comic_id, update: Update, context: ContextTypes.DEFA
     print(datetime.datetime.now(), "\t", "Comic " + comic_id + " sent to chat.")
     return
 
+async def AI_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print(datetime.datetime.now(), "\t", "AI chat called.")
+    sys_prompt = "你正在和群组内的朋友们聊天，你乐于助人、活泼且言简意赅。"
+    usage_msg = "Usage: /llm <message>\nOr reply a message with /llm.\nAlso please aware that all chats are single-turn with no context saved."
+    if update.message.reply_to_message:
+        print(datetime.datetime.now(), "\t", "Asking: ", update.message.reply_to_message.text)
+        feedback = fetch_from_AI("DS", sys_prompt, update.message.reply_to_message.text)
+    else:
+        if not re.match(r'^/llm .*', update.message.text):
+            await context.bot.send_message(chat_id=update.effective_chat.id, text=usage_msg)
+            print("Showing usage")
+            return
+        else:
+            print(datetime.datetime.now(), "\t", "Asking: ", update.message.text.replace('/llm ', ''))
+            feedback = fetch_from_AI("DS", sys_prompt, update.message.text.replace('/llm ', ''))
+    print(datetime.datetime.now(), "\t", "Chat response: ", feedback)
+    await update.message.reply_to_message.reply_text(feedback)
+    print(datetime.datetime.now(), "\t Response sent.")
+
+
 def main():
     application = ApplicationBuilder().token(botToken).build()
 
@@ -594,7 +615,8 @@ def main():
     system_status_handler_switch = True
     apple_cn_msg_handler_switch = False
     what_to_eat_today_handler_switch = True
-    jm_download = True
+    jm_download_switch = True
+    AI_chat_switch = True
 
     # start handler
     if start_handler_switch:
@@ -625,12 +647,17 @@ def main():
         application.add_handler(what_to_eat_handler)
 
     # jm comic handler
-    if jm_download:
+    if jm_download_switch:
         # remove download folder if exists
         if os.path.exists('download'):
             shutil.rmtree('download')
         jm_comic_handler = CommandHandler('jm', jm_comic)
         application.add_handler(jm_comic_handler)
+
+    # AI chat handler
+    if AI_chat_switch:
+        AI_chat_handler = CommandHandler('llm', AI_chat)
+        application.add_handler(AI_chat_handler)
 
     # group welcome message setting handler
     group_welcome_msg_handler = CommandHandler('groupwelcome', group_welcome_msg_settings)

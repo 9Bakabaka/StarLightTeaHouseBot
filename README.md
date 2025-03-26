@@ -67,3 +67,9 @@ Easter egg: 5% chance eat "themselves"(sender's name)
 
 ### About jm comic download:
 Use "/jmcomic \<comic name\>" to download jm comic.
+
+### About LLM
+Chat with LLM with "/llm \<message\>" or reply a message with "/llm" to send the message.  
+All chats are single-turn with no context saved.
+Also use "/llm" to get usages.
+
