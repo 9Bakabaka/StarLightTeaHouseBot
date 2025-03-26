@@ -605,7 +605,7 @@ async def AI_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
             print(datetime.datetime.now(), "\t", "Asking: ", update.message.text.replace('/llm ', ''))
             feedback = fetch_from_AI("DS", sys_prompt, update.message.text.replace('/llm ', ''))
     print(datetime.datetime.now(), "\t", "Chat response: ", feedback)
-    await update.message.reply_to_message.reply_text(feedback)
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=feedback, reply_to_message_id=update.message.message_id)
     print(datetime.datetime.now(), "\t Response sent.")
 
 
