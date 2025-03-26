@@ -366,7 +366,10 @@ async def xm_and_fire(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # 50 50 羡慕 or fire
     if random.random() < 0.5:
         print(datetime.datetime.now(), "\t", "Replying 羡慕")
-        await update.message.reply_text('羡慕')
+        try:
+            await update.message.reply_text('羡慕')
+        except AttributeError:
+            pass
     else:
         print(datetime.datetime.now(), "\t", "Reacting 🔥")
         await context.bot.set_message_reaction(update.effective_chat.id, update.message.message_id, '🔥')
