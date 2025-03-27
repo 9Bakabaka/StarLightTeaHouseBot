@@ -2,6 +2,7 @@
 This is a telegram bot developed for StarLight Tea house.  
 
 [README](README.md) | [中文文档](README_zh.md)  
+Chinese document is maintained by [BiancoCat](https://github.com/BiancoCat) and may not be up-to-date.  
 
 # Usage:  
 ### Most of the functions can be toggled in main()
@@ -66,7 +67,8 @@ When triggered "/eattoday" or message contain words like "今天吃什么", bot 
 Easter egg: 5% chance eat "themselves"(sender's name)
 
 ### About jm comic download:
-Use "/jmcomic \<comic name\>" to download jm comic.
+Use "/jmcomic \<comic name\>" to download jm comic. The downloaded comic will be converted to a PDF file and sent to the chat.  
+**Warning: This function may take a lot of time and resources. If your machine is not powerful enough, the bot may crash.**  
 
 ### About LLM
 Chat with LLM with "/llm \<message\>" or reply a message with "/llm" to send the message.  
