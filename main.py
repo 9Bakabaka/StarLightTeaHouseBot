@@ -147,7 +147,7 @@ async def system_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # group welcome message setting handler
 async def group_welcome_msg_settings(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(datetime.datetime.now(), "\t", "Received " + update.message.text + ", ", end="")
-    usage_msg = "Usage:\n/groupwelcome <on/off> Toggle group welcome message.\n/groupwelcome setmsg <message> Set group welcome message.\n/groupwelcome verify <on/off> Toggle group verify.\n/groupwelcome vffilter <regex> Set group verify filter.\n/groupwelcome setvfmsg <message> Set group verify message.\n/groupwelcome setvffailmsg <message> Set group verify fail message.\n /groupwelcome approve Approve all user pending."
+    usage_msg = "Usage:\n/groupwelcome <on/off> Toggle group welcome message.\n/groupwelcome setmsg <message> Set group welcome message.\n/groupwelcome verify <on/off> Toggle group verify.\n/groupwelcome vffilter <regex> Set group verify filter.\n/groupwelcome setvfmsg <message> Set group verify message.\n/groupwelcome setvffailmsg <message> Set group verify fail message.\n/groupwelcome approve Approve all user pending."
     if update.effective_chat.type not in ['group', 'supergroup']:
         await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text="This command is only available in group.")
