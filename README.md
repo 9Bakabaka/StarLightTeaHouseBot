@@ -23,6 +23,7 @@ Usages (Also try "/groupwelcome" for usages in chat):
 /groupwelcome vffilter <regex> Set group verify filter.  
 /groupwelcome setvfmsg <message> Set group verify message.  
 /groupwelcome setvffailmsg <message> Set group verify fail message.  
+/groupwelcome approve Approve all user pending.  
 In **welcome message**, you can use {new_member_username}, {new_member_first_name} and {and new_member_last_name} in the message.  
 Verify message would be sent if verify is enabled.  
 After the new user send a message matches the filter by regex, then the bot will send **verify message**.  

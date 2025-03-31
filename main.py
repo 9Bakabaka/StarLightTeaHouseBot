@@ -99,7 +99,11 @@ class WhatToEatFilter(MessageFilter):
 
 class NewUserFilter(MessageFilter):
     def filter(self, message):
-        return message.new_chat_members
+        if message.new_chat_members:
+            for user in message.new_chat_members:
+                if user.id == message.from_user.id:
+                    return True
+        return False
 
 
 class StickerFilter(MessageFilter):
@@ -143,7 +147,7 @@ async def system_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # group welcome message setting handler
 async def group_welcome_msg_settings(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(datetime.datetime.now(), "\t", "Received " + update.message.text + ", ", end="")
-    usage_msg = "Usage:\n/groupwelcome <on/off> Toggle group welcome message.\n/groupwelcome setmsg <message> Set group welcome message.\n/groupwelcome verify <on/off> Toggle group verify.\n/groupwelcome vffilter <regex> Set group verify filter.\n/groupwelcome setvfmsg <message> Set group verify message.\n/groupwelcome setvffailmsg <message> Set group verify fail message."
+    usage_msg = "Usage:\n/groupwelcome <on/off> Toggle group welcome message.\n/groupwelcome setmsg <message> Set group welcome message.\n/groupwelcome verify <on/off> Toggle group verify.\n/groupwelcome vffilter <regex> Set group verify filter.\n/groupwelcome setvfmsg <message> Set group verify message.\n/groupwelcome setvffailmsg <message> Set group verify fail message.\n /groupwelcome approve Approve all user pending."
     if update.effective_chat.type not in ['group', 'supergroup']:
         await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text="This command is only available in group.")
@@ -217,6 +221,11 @@ async def group_welcome_msg_settings(update: Update, context: ContextTypes.DEFAU
             await context.bot.send_message(chat_id=update.effective_chat.id,
                                            text="Group verify fail message updated.")
             print("Group verify fail message updated.")
+        elif update.message.text.startswith('/groupwelcome approve'):
+            new_user_verify = NewUserVerify()
+            await new_user_verify.verify_twitter_user_name(update, context)
+            await context.bot.send_message(chat_id=update.effective_chat.id, text="Verify pool cleared.")
+            print("Verify pool cleared.")
         else:
             # default aka not recognized
             await context.bot.send_message(chat_id=update.effective_chat.id,
@@ -354,6 +363,12 @@ class NewUserVerify:
                 timer_task.cancel()
             del self.new_user_data[userID]
         return
+
+    async def clear_verify_pool(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        print(datetime.datetime.now(), "\t", "ClearVerifyPool Called")
+        # clear all new user data
+        self.new_user_data = {}
+        print(datetime.datetime.now(), "\t", "User_data updated to: ", self.new_user_data)
 
 
 # mark a crown emoji on the message if it contains '国行'
