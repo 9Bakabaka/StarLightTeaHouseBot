@@ -72,6 +72,8 @@ Use "/jmcomic \<comic name\>" to download jm comic. The downloaded comic will be
 **Warning: This function may take a lot of time and resources. If your machine is not powerful enough, the bot may crash.**  
 
 ### About LLM
+Default model is Deepseek. If you want to use GPT, you might need to change some code in LLM.py.  
+Create a text file named "DSapi.txt" at the same folder as the script and put your token in it.
 Chat with LLM with "/llm \<message\>" or reply a message with "/llm" to send the message.  
 All chats are single-turn with no context saved.
 Also use "/llm" to get usages.
