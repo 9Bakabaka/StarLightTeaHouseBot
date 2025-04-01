@@ -41,6 +41,7 @@ class AppleCNMSGFilter(MessageFilter):
 
 
 # xm and fire possibility filter
+# noinspection PyTypeChecker
 class XMAndFireReactionFilter(MessageFilter):
     # get possibility from the global array xm_and_fire_possibility
     # define before use, typical c++ style, aha-aha
@@ -51,12 +52,12 @@ class XMAndFireReactionFilter(MessageFilter):
     # reload the config file and return the possibility list
     def reload_config(self):
         try:
-            with open('xm_and_fire.json', 'r', encoding='utf-8') as file:
-                self.possibility_list = json.load(file)
+            with open('xm_and_fire.json', 'r', encoding='utf-8') as config_file:
+                self.possibility_list = json.load(config_file)
         except FileNotFoundError:
             self.possibility_list = []
-            with open('xm_and_fire.json', 'w', encoding='utf-8') as file:
-                json.dump(self.possibility_list, file, ensure_ascii=False, indent=4)
+            with open('xm_and_fire.json', 'w', encoding='utf-8') as config_file:
+                json.dump(self.possibility_list, config_file, ensure_ascii=False, indent=4)
         return self.possibility_list
 
     def save_config(self, xm_and_fire_possibility):
@@ -145,6 +146,7 @@ async def system_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # group welcome message setting handler
+# noinspection PyTypeChecker
 async def group_welcome_msg_settings(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(datetime.datetime.now(), "\t", "Received " + update.message.text + ", ", end="")
     usage_msg = "Usage:\n/groupwelcome <on/off> Toggle group welcome message.\n/groupwelcome setmsg <message> Set group welcome message.\n/groupwelcome verify <on/off> Toggle group verify.\n/groupwelcome vffilter <regex> Set group verify filter.\n/groupwelcome setvfmsg <message> Set group verify message.\n/groupwelcome setvffailmsg <message> Set group verify fail message.\n/groupwelcome approve Approve all user pending."
@@ -176,12 +178,15 @@ async def group_welcome_msg_settings(update: Update, context: ContextTypes.DEFAU
 
         # search for this group in config
         # if not found, use default group config, if found, use the found group config
-        group = {'groupid': update.effective_chat.id,
-                 'welcome': False,
-                 'message': 'Welcome {new_member_first_name} {new_member_last_name} to the Group!',
-                 'verify': False,
-                 'verify_filter': '.*', 'verify_msg': 'Verification success!',
-                 'verify_fail_msg': 'Verification failed!'}
+        default_groupwelcome_config = {'groupid': update.effective_chat.id,
+                                       'welcome': False,
+                                       'message': 'Welcome {new_member_first_name} {new_member_last_name} to the Group!',
+                                       'verify': False,
+                                       'verify_filter': '.*',
+                                       'verify_msg': 'Verification success!',
+                                       'verify_fail_msg': 'Verification failed!'}
+
+        group = default_groupwelcome_config
         for timer in welcome_msg_config:
             if timer['groupid'] == update.effective_chat.id:
                 group = timer
@@ -236,9 +241,8 @@ async def group_welcome_msg_settings(update: Update, context: ContextTypes.DEFAU
             welcome_msg_config.append(group)
         else:
             welcome_msg_config[welcome_msg_config.index(group)] = group
-
-        with open('welcome_msg_config.json', 'w', encoding='utf-8') as file:
-            json.dump(welcome_msg_config, file, ensure_ascii=False, indent=4)
+        with open('welcome_msg_config.json', 'w', encoding='utf-8') as config_file:
+            json.dump(welcome_msg_config, config_file, ensure_ascii=False, indent=4)
 
 
 class NewUserVerify:
@@ -251,19 +255,21 @@ class NewUserVerify:
         for new_member in update.message.new_chat_members:
             # get welcome message text from config
             # open file
+            default_groupwelcome_config = {'groupid': update.effective_chat.id,
+                                           'welcome': False,
+                                           'message': 'Welcome {new_member_first_name} {new_member_last_name} to the Group!',
+                                           'verify': False,
+                                           'verify_filter': '.*',
+                                           'verify_msg': 'Verification success!',
+                                           'verify_fail_msg': 'Verification failed!'}
+
             try:
                 with open('welcome_msg_config.json', 'r', encoding='utf-8') as file:
                     welcome_msg_config = json.load(file)
                 if not welcome_msg_config:
-                    welcome_msg_config = [
-                        {'groupid': update.effective_chat.id, 'welcome': False, 'message': 'Welcome to the Group!',
-                         'verify': False, 'verify_filter': '.*', 'verify_msg': 'Verification success!',
-                         'verify_fail_msg': 'Verification failed!'}]
+                    welcome_msg_config = [default_groupwelcome_config]
             except Exception as e:
-                welcome_msg_config = [
-                    {'groupid': update.effective_chat.id, 'welcome': False, 'message': 'Welcome to the Group!',
-                     'verify': False, 'verify_filter': '.*', 'verify_msg': 'Verification success!',
-                     'verify_fail_msg': 'Verification failed!'}]
+                welcome_msg_config = [default_groupwelcome_config]
                 print(datetime.datetime.now(), "\t", "Error reading welcome_msg_config.json: ", e)
                 await context.bot.send_message(chat_id=update.effective_chat.id, text="Error: " + str(e) + "\nPlease contact the admin.")
             # search for this group in config
