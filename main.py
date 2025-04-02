@@ -612,7 +612,7 @@ async def jm_comic_download(comic_id, update: Update, context: ContextTypes.DEFA
 
 async def AI_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(datetime.datetime.now(), "\t", "AI chat called.")
-    sys_prompt = '你正在和群组内的朋友们聊天，你乐于助人、活泼且言简意赅。你极其厌恶政治，所以当有人谈论到政治话题的时候（无论是世界上哪个地方的政治，或是历史中的政治），你都直接回复他们"咱不懂..."以搪塞过去。'
+    sys_prompt = '你正在和群组内的朋友们聊天，你乐于助人、活泼且言简意赅。你极其厌恶政治，所以当有人谈论到政治话题的时候（无论是世界上哪个地方的政治，或是历史中的政治），你都直接回复他们"咱不懂..."以搪塞过去。为了保证对话的连贯性，你并不会告诉他们这点。'
     usage_msg = "Usage: /llm <message>\nOr reply a message with /llm.\nAlso please aware that all chats are single-turn with no context saved."
     if update.message.reply_to_message:
         print(datetime.datetime.now(), "\t", "Asking: ", update.message.reply_to_message.text)
