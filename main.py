@@ -14,8 +14,7 @@ import os
 import shutil
 
 from telegram import Update, InlineQueryResultArticle, InputTextMessageContent, InlineQueryResultCachedSticker
-from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, ConversationHandler, filters, \
-    InlineQueryHandler, CallbackContext
+from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, ConversationHandler, filters, InlineQueryHandler, CallbackContext
 from telegram.ext.filters import MessageFilter
 
 import notifyAdmin
@@ -112,6 +111,13 @@ class StickerFilter(MessageFilter):
         if message.sticker and message.chat.type == 'private':
             print(datetime.datetime.now(), "\t", "Received a sticker.")
             return message.sticker
+
+
+class DennoMienmienMaoFilter(MessageFilter):
+    def filter(self, message):
+        if message.text and re.match(r'电.*脑.*眠.*眠.*猫', message.text):
+            return True
+        return False
 
 
 # start command handler
@@ -506,6 +512,38 @@ async def manual_fire(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 print("Error: ", e)
                 await context.bot.send_message(chat_id=update.effective_chat.id, text="Error: " + str(e))
 
+async def un_xm(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print(datetime.datetime.now(), "\t", "Received /unxm, ", end="")
+    usage_msg = "Usage: /unxm <message link>\nOr reply a message with /unxm."
+    if update.message.reply_to_message:
+        await delete_xm_msg(context, update.effective_chat.id, update.message.reply_to_message)
+        return
+    else:
+        if not re.match(r'^/xm https://t\.me/c/(\d+)/(\d+)$', update.message.text):
+            await context.bot.send_message(chat_id=update.effective_chat.id, text=usage_msg)
+            print("Showing usage")
+            return
+        else:
+            try:
+                message_id = int(re.match(r'^/xm https://t\.me/c/(\d+)/(\d+)$', update.message.text).group(2))
+                await delete_xm_msg(context, update.effective_chat.id, context.bot.get_message(chat_id=update.effective_chat.id, message_id=message_id))
+            except Exception as e:
+                print("Error: ", e)
+                await context.bot.send_message(chat_id=update.effective_chat.id, text="Error: " + str(e))
+
+# message: the message ready to be deleted
+async def delete_xm_msg(context, chat_id, message):
+    if message.from_user.id != context.bot.id:
+        print("Not bot's message.")
+        await context.bot.send_message(chat_id=chat_id, text="Bot can only remove its own message.")
+        return
+    if message.text != '羡慕':
+        print("Not a 羡慕 message.")
+        await context.bot.send_message(caht_id=chat_id, text="This message is not 羡慕.")
+        return
+    await context.bot.delete_message(chat_id=chat_id, message_id=message.id)
+    print("Deleting 羡慕")
+
 # random reply a kind of food when calling /eattoday
 async def what_to_eat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(datetime.datetime.now(), "\t", "What to eat today called.")
@@ -610,6 +648,7 @@ async def jm_comic_download(comic_id, update: Update, context: ContextTypes.DEFA
     print(datetime.datetime.now(), "\t", "Comic " + comic_id + " sent to chat.")
     return
 
+# /llm command stuffs
 async def AI_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(datetime.datetime.now(), "\t", "AI chat called.")
     sys_prompt = '你正在和群组内的朋友们聊天，你乐于助人、活泼且言简意赅。你极其厌恶政治，所以当有人谈论到政治话题的时候（无论是世界上哪个地方的政治，或是历史中的政治），你都直接回复他们"咱不懂..."以搪塞过去。为了保证对话的连贯性，你并不会告诉他们这点。'
@@ -630,6 +669,11 @@ async def AI_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text=feedback, reply_to_message_id=update.message.message_id)
     print(datetime.datetime.now(), "\t Response sent.")
 
+# \non non!/
+async def denno_mienmien_mao_nonnon(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print(datetime.datetime.now(), "\t", "Received 电脑眠眠猫.")
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="\\non non!/")
+
 
 def main():
     application = ApplicationBuilder().token(botToken).build()
@@ -642,6 +686,7 @@ def main():
     what_to_eat_today_handler_switch = True
     jm_download_switch = True
     AI_chat_switch = True
+    dinno_mienmien_mao_handler_switch = True
 
     # start handler
     if start_handler_switch:
@@ -684,6 +729,12 @@ def main():
         AI_chat_handler = CommandHandler('llm', AI_chat)
         application.add_handler(AI_chat_handler)
 
+    # denno mienmien mao handler
+    if dinno_mienmien_mao_handler_switch:
+        denno_mienmien_mao_filter = DennoMienmienMaoFilter()
+        dinno_mienmien_mao_handler = MessageHandler(denno_mienmien_mao_filter, denno_mienmien_mao_nonnon)
+        application.add_handler(dinno_mienmien_mao_handler)
+
     # group welcome message setting handler
     group_welcome_msg_handler = CommandHandler('groupwelcome', group_welcome_msg_settings)
     application.add_handler(group_welcome_msg_handler)
@@ -720,6 +771,9 @@ def main():
     application.add_handler(manual_xm_handler)
     manual_fire_handler = CommandHandler('fire', manual_fire)
     application.add_handler(manual_fire_handler)
+
+    un_xm_handler = CommandHandler('unxm', un_xm)
+    application.add_handler(un_xm_handler)
 
     # xm and fire reaction handler
     # this handler must be put after all message handlers
