@@ -57,6 +57,7 @@ Usages (Also try "/xmfire" for usages in chat):
 /xmfire set <probability> Set probability of triggering the function.  
 When the function is triggered, bot would reply "羡慕"(50%) or react "🔥"(50%) to the message.  
 Manual 羡慕 and fire reaction are also supported. Use /xm \<message link\> or /fire \<message link\>. Or just reply /xm or /fire to the message.  
+You can also use /unxm <message link> or reply /unxm to a message to cancel the reaction.  
 ~~\[Not finished\] If you think the bot is too annoying, you can use /xmfire suppress <minutes> to suppress it temporarily.~~  
 
 ### About sticker file id query:  
@@ -66,6 +67,9 @@ Send a sticker to bot in pm. It would return the file id.
 Put food names in a file named "foodlist.txt", one food name per line.
 When triggered "/eattoday" or message contain words like "今天吃什么", bot would randomly choose one food name from the list.  
 Easter egg: 5% chance eat "themselves"(sender's name)
+
+### About denno mienmien mao:  
+\\non non!/
 
 ### About jm comic download:
 Use "/jmcomic \<comic name\>" to download jm comic. The downloaded comic will be converted to a PDF file and sent to the chat.  
