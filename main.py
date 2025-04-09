@@ -531,7 +531,7 @@ async def un_xm(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 print("Error: ", e)
                 await context.bot.send_message(chat_id=update.effective_chat.id, text="Error: " + str(e))
 
-# message: the message ready to be deleted
+# message: the message that is about to be deleted
 async def delete_xm_msg(context, chat_id, message):
     if message.from_user.id != context.bot.id:
         print("Not bot's message.")
@@ -539,7 +539,7 @@ async def delete_xm_msg(context, chat_id, message):
         return
     if message.text != '羡慕':
         print("Not a 羡慕 message.")
-        await context.bot.send_message(caht_id=chat_id, text="This message is not 羡慕.")
+        await context.bot.send_message(chat_id=chat_id, text="This message is not 羡慕.")
         return
     await context.bot.delete_message(chat_id=chat_id, message_id=message.id)
     print("Deleting 羡慕")
