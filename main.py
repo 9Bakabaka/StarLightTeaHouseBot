@@ -65,6 +65,7 @@ class XMAndFireReactionFilter(MessageFilter):
 
     def filter(self, message):
         # try to get possibility from possibility list
+        self.enabled = False
         try:
             for group in self.possibility_list:
                 if group['groupid'] == message.chat.id:
@@ -74,11 +75,11 @@ class XMAndFireReactionFilter(MessageFilter):
             self.possibility = 0
             self.possibility_list[message.chat.id] = {'groupid': message.chat.id, 'possibility': 0, 'enabled': False}
             # save change to file
-            with open('xm_and_fire.json', 'w', encoding='utf-8') as file:
-                json.dump(self.possibility_list, file, ensure_ascii=False, indent=4)
+            with open('xm_and_fire.json', 'w', encoding='utf-8') as config_file:
+                json.dump(self.possibility_list, config_file, ensure_ascii=False, indent=4)
             # reload the file
-            with open('xm_and_fire.json', 'r', encoding='utf-8') as file:
-                self.possibility_list = json.load(file)
+            with open('xm_and_fire.json', 'r', encoding='utf-8') as config_file:
+                self.possibility_list = json.load(config_file)
             return False
 
         # if not enabled, return False
@@ -395,7 +396,7 @@ async def xm_and_fire(update: Update, context: ContextTypes.DEFAULT_TYPE):
         print(datetime.datetime.now(), "\t", "Replying 羡慕")
         try:
             await update.message.reply_text('羡慕')
-        except AttributeError:
+        except AttributeError:  # when message is edited, it would call AttributeError, but it's OK
             pass
     else:
         print(datetime.datetime.now(), "\t", "Reacting 🔥")
