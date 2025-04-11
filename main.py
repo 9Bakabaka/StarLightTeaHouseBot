@@ -645,9 +645,17 @@ async def jm_comic_download(comic_id, update: Update, context: ContextTypes.DEFA
     print(datetime.datetime.now(), "\t", "Downloading comic " + comic_id)
     pdf_file = download_comic(comic_id)
     print(datetime.datetime.now(), "\t", "Comic " + comic_id + " downloaded. Sending to chat...")
-    await context.bot.send_document(chat_id=update.effective_chat.id, document=open(f"download/{pdf_file}", 'rb'))
-    print(datetime.datetime.now(), "\t", "Comic " + comic_id + " sent to chat.")
-    return
+    try:
+        await context.bot.send_document(chat_id=update.effective_chat.id, document=open(f"download/{pdf_file}", 'rb'))
+        print(datetime.datetime.now(), "\t", "Comic " + comic_id + " sent to chat.")
+        return
+    except telegram.error.NetworkError as e:
+        if "Request Entity Too Large" in str(e):
+            print("Error: File size exceeds the limit.")
+            await context.bot.send_message(chat_id=update.effective_chat.id, text="Error: File is too large to send.")
+        else:
+            print("NetworkError: ", e)
+            await context.bot.send_message(chat_id=update.effective_chat.id, text="NetworkError: " + str(e))
 
 # /llm command stuffs
 async def AI_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
