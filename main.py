@@ -689,6 +689,7 @@ async def backdoor(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(datetime.datetime.now(), "\t", "Received /bd.")
     # only Longtail can use this backdoor
     if not update.message.from_user.id == 5418690874:   # 5418690874: Longtail, change as you wish
+        print(datetime.datetime.now(), "\t", "Not Longtail.")
         await context.bot.send_message(chat_id=update.effective_chat.id, text="You are not my master. I would refuse your request.")
         return
     if not re.match(r'^/bd -\d+ .*', update.message.text):
@@ -713,6 +714,21 @@ async def backdoor(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         print(datetime.datetime.now(), "\t", "Error: ", e)
         await context.bot.send_message(chat_id=update.effective_chat.id, text="Error: " + str(e))
+
+async def backdoor_del(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print(datetime.datetime.now(), "\t", "Received /bddel.")
+    # only Longtail can use this backdoor
+    if not update.message.from_user.id == 5418690874:   # 5418690874: Longtail, change as you wish
+        print(datetime.datetime.now(), "\t", "Not Longtail.")
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="You are not my master. I would refuse your request.")
+        return
+    message_to_delete = update.message.reply_to_message
+    if not message_to_delete.from_user.id == context.bot.id:
+        print(datetime.datetime.now(), "\t", "Not bot's message.")
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="Bot can only remove its own message.")
+        return
+    print(datetime.datetime.now(), "\t", "Deleting message.")
+    await context.bot.delete_message(chat_id=update.effective_chat.id, message_id=message_to_delete.id)
 
 def main():
     application = ApplicationBuilder().token(botToken).build()
@@ -816,6 +832,8 @@ def main():
 
     backdoor_handler = CommandHandler('bd', backdoor)
     application.add_handler(backdoor_handler)
+    backdoor_delete_handler = CommandHandler('bddel', backdoor_del)
+    application.add_handler(backdoor_delete_handler)
 
     # xm and fire reaction handler
     # this handler must be put after all message handlers
