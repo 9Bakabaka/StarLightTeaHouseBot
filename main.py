@@ -765,12 +765,6 @@ def main():
         AppleCNMSG_handler = MessageHandler(appleCNMSGFilter, apple_cn_msg)
         application.add_handler(AppleCNMSG_handler)
 
-    # what to eat today handler
-    if what_to_eat_today_handler_switch:
-        what_to_eat_filter = WhatToEatFilter()
-        what_to_eat_handler = MessageHandler(what_to_eat_filter, what_to_eat)
-        application.add_handler(what_to_eat_handler)
-
     # jm comic handler
     if jm_download_switch:
         # remove download folder if exists
@@ -783,12 +777,6 @@ def main():
     if AI_chat_switch:
         AI_chat_handler = CommandHandler('llm', AI_chat)
         application.add_handler(AI_chat_handler)
-
-    # denno mienmien mao handler
-    if dinno_mienmien_mao_handler_switch:
-        denno_mienmien_mao_filter = DennoMienmienMaoFilter()
-        dinno_mienmien_mao_handler = MessageHandler(denno_mienmien_mao_filter, denno_mienmien_mao_nonnon)
-        application.add_handler(dinno_mienmien_mao_handler)
 
     # group welcome message setting handler
     group_welcome_msg_handler = CommandHandler('groupwelcome', group_welcome_msg_settings)
@@ -826,7 +814,6 @@ def main():
     application.add_handler(manual_xm_handler)
     manual_fire_handler = CommandHandler('fire', manual_fire)
     application.add_handler(manual_fire_handler)
-
     un_xm_handler = CommandHandler('unxm', un_xm)
     application.add_handler(un_xm_handler)
 
@@ -834,6 +821,18 @@ def main():
     application.add_handler(backdoor_handler)
     backdoor_delete_handler = CommandHandler('bddel', backdoor_del)
     application.add_handler(backdoor_delete_handler)
+
+    # message handlers at the end
+    # what to eat today handler
+    if what_to_eat_today_handler_switch:
+        what_to_eat_filter = WhatToEatFilter()
+        what_to_eat_handler = MessageHandler(what_to_eat_filter, what_to_eat)
+        application.add_handler(what_to_eat_handler)
+    # denno mienmien mao handler
+    if dinno_mienmien_mao_handler_switch:
+        denno_mienmien_mao_filter = DennoMienmienMaoFilter()
+        dinno_mienmien_mao_handler = MessageHandler(denno_mienmien_mao_filter, denno_mienmien_mao_nonnon)
+        application.add_handler(dinno_mienmien_mao_handler)
 
     # xm and fire reaction handler
     # this handler must be put after all message handlers
