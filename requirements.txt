@@ -18,3 +18,4 @@ jmcomic==2.5.32
 pillow==11.1.0
 PyPDF2==3.0.1
 openai==1.68.2
+nest-asyncio==1.6.0
