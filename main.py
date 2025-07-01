@@ -661,7 +661,7 @@ async def jm_comic_download(comic_id: str, update: Update, context: ContextTypes
         print(datetime.datetime.now(), "\t", "Comic " + comic_id + " sent to chat.")
 
     except telegram.error.TimedOut:
-        await update.message.reply_text("Download comic timed out.")
+        pass    # This error is expected when the download takes too long, we will just ignore it
     except telegram.error.NetworkError as e:
         if "Request Entity Too Large" in str(e):
             print("Error: File size exceeds the limit.")
