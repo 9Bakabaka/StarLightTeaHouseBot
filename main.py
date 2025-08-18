@@ -97,8 +97,10 @@ class WhatToEatFilter(MessageFilter):
         if message.text:
             if '/eattoday' in message.text:
                 return 1
-            if re.search(r'今天吃什么|等会吃什么|早上吃什么|中午吃什么|下午吃什么|晚上吃什么|饿了|好饿|饿饿', message.text):
+            if re.search(r'今天吃什么|等会吃什么|早上吃什么|中午吃什么|下午吃什么|晚上吃什么|饿了(?!吗)|好饿|饿饿', message.text):
                 return 1
+            return None
+        return None
 
 
 class NewUserFilter(MessageFilter):
@@ -115,6 +117,7 @@ class StickerFilter(MessageFilter):
         if message.sticker and message.chat.type == 'private':
             print(datetime.datetime.now(), "\t", "Received a sticker.")
             return message.sticker
+        return None
 
 
 class DennoMienmienMaoFilter(MessageFilter):
@@ -897,4 +900,3 @@ async def main():
 
 if __name__ == '__main__':
     asyncio.run(main())
-
