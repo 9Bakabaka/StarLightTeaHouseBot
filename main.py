@@ -97,7 +97,7 @@ class WhatToEatFilter(MessageFilter):
         if message.text:
             if '/eattoday' in message.text:
                 return 1
-            if re.search(r'今天吃什么|等会吃什么|早上吃什么|中午吃什么|下午吃什么|晚上吃什么|饿了(?!吗)|好饿|饿饿', message.text):
+            if re.search(r'今天吃什么|等会吃什么|早上吃什么|中午吃什么|下午吃什么|晚上吃什么|饿了(?!么)|好饿|饿饿', message.text):
                 return 1
             return None
         return None
