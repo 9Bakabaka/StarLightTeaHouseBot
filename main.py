@@ -852,7 +852,7 @@ async def main():
     # read possibility for each group from xm_and_fire.json, this config file would be in the ram
     xm_and_fire_reaction_filter.reload_config()
     # pass the object to settings function
-    xm_and_fire_settings_handler = CommandHandler('xmfire', partial(xm_and_fire_settings, xm_and_fire_filter_obj=xm_and_fire_reaction_filter))
+    xm_and_fire_settings_handler = CommandHandler('xianmufire', partial(xm_and_fire_settings, xm_and_fire_filter_obj=xm_and_fire_reaction_filter))
     application.add_handler(xm_and_fire_settings_handler)
 
     # manual xm and fire handlers
