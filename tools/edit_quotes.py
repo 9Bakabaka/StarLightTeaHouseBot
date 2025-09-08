@@ -1,10 +1,17 @@
+###################################################################
+# If you need to use this script, you need to install PyQt5 first #
+###################################################################
+
+# PyQt5==5.15.11
+# PyQt5-Qt5==5.15.15
+# PyQt5_sip==12.15.0
+
 import sys
 import json
-from textwrap import indent
 
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, QPushButton, \
     QHBoxLayout, QMessageBox
-from PyQt5.QtCore import Qt, QEvent
+from PyQt5.QtCore import QEvent
 
 
 def load_quotes_from_file():
