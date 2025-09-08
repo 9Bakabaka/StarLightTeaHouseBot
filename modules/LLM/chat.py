@@ -5,7 +5,7 @@ import re
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from fetch_LLM import fetch_from_AI
+from .fetch_LLM import fetch_from_AI
 
 # /llm command stuffs
 async def llm(update: Update, context: ContextTypes.DEFAULT_TYPE):

@@ -6,7 +6,7 @@ import re
 from telegram import Update
 from telegram.ext import ContextTypes,ConversationHandler
 from telegram.ext.filters import MessageFilter
-import notify_admin
+from . import notify_admin
 
 class NewUserFilter(MessageFilter):
     def filter(self, message):
@@ -244,4 +244,3 @@ async def group_welcome_msg_settings(update: Update, context: ContextTypes.DEFAU
             welcome_msg_config[welcome_msg_config.index(group)] = group
         with open('../../config/welcome_msg_config.json', 'w', encoding='utf-8') as config_file:
             json.dump(welcome_msg_config, config_file, ensure_ascii=False, indent=4)
-
