@@ -15,8 +15,9 @@ RUN apk update && apk add --no-cache \
 WORKDIR /app
 
 # 复制 main.py 到镜像中的 /app 目录
-COPY ./main.py /app/main.py
-COPY ./notifyAdmin.py /app/notifyAdmin.py
+COPY ../main.py /app/main.py
+COPY ../modules /app/modules
+COPY ../config /app/config
 COPY ./docker_requirements.txt /app/requirements.txt
 
 # 创建并激活虚拟环境

@@ -1,0 +1,17 @@
+services:
+  tgbot:
+    build:
+      context: ".."
+      dockerfile: "./docker/Dockerfile"
+    container_name: tgbot
+    env_file:
+      - ../.env
+    environment:
+      - DEBUG_MODE=false
+      - LOG_LEVEL=INFO
+    volumes:
+      - ../config:/app/config
+      - ../download:/app/download
+    restart: unless-stopped
+    # ports:
+    #   - "8443:8443"

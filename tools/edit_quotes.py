@@ -11,10 +11,10 @@ def load_quotes_from_file():
     # if quotes.json not exist, open() will create it
     print("Loading quotes from file...")
     try:
-        with open('quotes.json', 'r') as file:
+        with open('../config/quotes.json', 'r') as file:
             File = json.load(file)
     except FileNotFoundError:
-        with open('quotes.json', 'w') as file:
+        with open('../config/quotes.json', 'w') as file:
             json.dump([], file)
         File = []
     print("Quotes loaded.")
@@ -23,7 +23,7 @@ def load_quotes_from_file():
 
 def save_quotes_to_file(quotes):
     print("Saving quotes to file...")
-    with open('quotes.json', 'w') as file:
+    with open('../config/quotes.json', 'w') as file:
         json.dump(quotes, file, ensure_ascii=False, indent=4)
     print("Quotes saved.")
 

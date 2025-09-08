@@ -1,7 +1,10 @@
+# This file is a copy of LLM.py in Must2502 SE252 project
+import os
+
 from openai import OpenAI, APIStatusError
 
-with open('DSapi.txt', 'r') as f:
-    DS_api = f.read()
+# with open('DSapi.txt', 'r') as f:
+#     DS_api = f.read()
 # with open('GPTapi.txt', 'r') as f:
 #     GPT_api = f.read()
 
@@ -21,7 +24,7 @@ def fetch_from_AI(platform, sys_prompt, user_prompt):
         return "Error"
 
     response = None
-    client = OpenAI(api_key=DS_api, base_url=base_url)
+    client = OpenAI(api_key=os.getenv("DEEPSEEK_API_KEY"), base_url=base_url)
     try:
         response = client.chat.completions.create(
             model=AI_model,

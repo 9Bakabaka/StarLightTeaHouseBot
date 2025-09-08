@@ -1,7 +1,0 @@
-services:
-  tgbot:
-    build: "."
-    container_name: tgbot
-    volumes:
-      - ./bottoken:/app/bottoken
-    restart: unless-stopped
