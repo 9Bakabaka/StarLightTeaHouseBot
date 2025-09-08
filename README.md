@@ -78,7 +78,7 @@ You can also use /unxm <message link> or reply /unxm to a message to cancel the 
 Send a sticker to bot in pm. It would return the file id.
 
 ### About what to eat today:
-Put food names in a file named "foodlist.txt" in config, one food name per line.
+Put food names in a file named "foodlist.txt" in config, one food name per line. An example file is provided.
 When triggered "/eattoday" or message contain words like "今天吃什么", bot would randomly choose one food name from the list.  
 Easter egg: 5% chance eat "themselves"(sender's name)
 
