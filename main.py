@@ -11,6 +11,7 @@ from functools import partial
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ConversationHandler, filters, InlineQueryHandler
 from dotenv import load_dotenv
 
+
 # todo: silence for x minutes
 # todo: 尾巴触电
 # todo: add quote, print quote list and delete quote
@@ -18,6 +19,7 @@ from dotenv import load_dotenv
 
 async def main():
     load_dotenv()
+    # load_dotenv('.env.test')
     application = ApplicationBuilder().token(os.getenv("TELEGRAM_BOT_TOKEN")).build()
 
     # start handler
@@ -47,7 +49,19 @@ async def main():
     # jm comic handler
     if os.getenv("ENABLE_JM_DOWNLOAD"):
         from modules.jm import jm_comic
-        # remove download folder if exists
+        # write absolute download path to jm_dl_option.yml
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        print(datetime.datetime.now(), "\t", "Setting jmcomic download path to ", os.path.join(base_dir, "download", "cache"))
+        with open(os.path.join(base_dir, 'config', 'jm_dl_option.yml'), 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+        with open(os.path.join(base_dir, 'config', 'jm_dl_option.yml'), 'w', encoding='utf-8') as f:
+            for line in lines:
+                if line.strip().startswith('base_dir:'):
+                    f.write(f'  base_dir: "{os.path.join(base_dir, "download", "cache")}"\n')
+                else:
+                    f.write(line)
+
+        # remove download folder if exists aka clear cache
         if os.path.exists('download'):
             shutil.rmtree('download')
         jm_comic_handler = CommandHandler('jm', jm_comic)
@@ -129,14 +143,30 @@ async def main():
     from modules.inline import inline_query
     application.add_handler(InlineQueryHandler(inline_query))
 
-    # clear received message before bot starts
-    print(datetime.datetime.now(), "\t", "Clearing received messages...")
-    await application.bot.get_updates(offset=-1)
+    from telegram.error import TimedOut
+    while True:
+        try:
+            # clear received message before bot starts
+            print(datetime.datetime.now(), "\t", "Clearing received messages...")
+            await application.bot.get_updates(offset=-1)
 
-    # start the bot
-    print(datetime.datetime.now(), "\t", "All handlers are loaded. Starting the bot now...")
-    await application.run_polling()
+            # start the bot
+            print(datetime.datetime.now(), "\t", "All handlers are loaded. Starting the bot now...")
+            await application.run_polling()
+        except TimedOut:
+            print(datetime.datetime.now(), "\t", "Timed out.")
+            pass    # My connection is really really really bad.
+
+
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except RuntimeError as e:
+        if "Cannot close a running event loop" in str(e):
+            # For environments with existing event loops (like PyCharm)
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(main())
+        else:
+            raise

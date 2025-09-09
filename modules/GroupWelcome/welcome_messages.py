@@ -2,11 +2,15 @@ import asyncio
 import datetime
 import json
 import re
+import os
 
 from telegram import Update
 from telegram.ext import ContextTypes,ConversationHandler
 from telegram.ext.filters import MessageFilter
 from . import notify_admin
+
+# Get the base directory (three levels up from this file since it's in modules/GroupWelcome/)
+base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 class NewUserFilter(MessageFilter):
     def filter(self, message):
@@ -35,7 +39,8 @@ class NewUserVerify:
                                            'verify_fail_msg': 'Verification failed!'}
 
             try:
-                with open('../../config/welcome_msg_config.json', 'r', encoding='utf-8') as file:
+                config_path = os.path.join(base_dir, 'config', 'welcome_msg_config.json')
+                with open(config_path, 'r', encoding='utf-8') as file:
                     welcome_msg_config = json.load(file)
                 if not welcome_msg_config:
                     welcome_msg_config = [default_groupwelcome_config]
@@ -85,7 +90,8 @@ class NewUserVerify:
         userID = update.message.from_user.id
         user_data = self.new_user_data.get(userID, {})
         try:
-            with open('../../config/welcome_msg_config.json', 'r', encoding='utf-8') as file:
+            config_path = os.path.join(base_dir, 'config', 'welcome_msg_config.json')
+            with open(config_path, 'r', encoding='utf-8') as file:
                 welcome_msg_config = json.load(file)
         except Exception as e:
             print(datetime.datetime.now(), "\t", "Error reading welcome_msg_config.json: ", e)
@@ -151,6 +157,10 @@ class NewUserVerify:
 async def group_welcome_msg_settings(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(datetime.datetime.now(), "\t", "Received " + update.message.text + ", ", end="")
     usage_msg = "Usage:\n/groupwelcome <on/off> Toggle group welcome message.\n/groupwelcome setmsg <message> Set group welcome message.\n/groupwelcome verify <on/off> Toggle group verify.\n/groupwelcome vffilter <regex> Set group verify filter.\n/groupwelcome setvfmsg <message> Set group verify message.\n/groupwelcome setvffailmsg <message> Set group verify fail message.\n/groupwelcome approve Approve all user pending."
+
+    # Define config_path at the beginning
+    config_path = os.path.join(base_dir, 'config', 'welcome_msg_config.json')
+
     if update.effective_chat.type not in ['group', 'supergroup']:
         await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text="This command is only available in group.")
@@ -172,7 +182,7 @@ async def group_welcome_msg_settings(update: Update, context: ContextTypes.DEFAU
 
         # read config file, locate current group and ready to edit
         try:
-            with open('../../config/welcome_msg_config.json', 'r', encoding='utf-8') as file:
+            with open(config_path, 'r', encoding='utf-8') as file:
                 welcome_msg_config = json.load(file)
         except (json.JSONDecodeError, FileNotFoundError):
             welcome_msg_config = []
@@ -242,5 +252,5 @@ async def group_welcome_msg_settings(update: Update, context: ContextTypes.DEFAU
             welcome_msg_config.append(group)
         else:
             welcome_msg_config[welcome_msg_config.index(group)] = group
-        with open('../../config/welcome_msg_config.json', 'w', encoding='utf-8') as config_file:
+        with open(config_path, 'w', encoding='utf-8') as config_file:
             json.dump(welcome_msg_config, config_file, ensure_ascii=False, indent=4)

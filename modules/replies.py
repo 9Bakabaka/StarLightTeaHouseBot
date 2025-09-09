@@ -2,10 +2,14 @@ import datetime
 import random
 import re
 import json
+import os
 
 from telegram import Update
 from telegram.ext import ContextTypes
 from telegram.ext.filters import MessageFilter
+
+# Get the base directory (two levels up from this file)
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # '国行' reaction filter
 class AppleCNMSGFilter(MessageFilter):
@@ -53,7 +57,8 @@ async def what_to_eat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         # food = ['麻辣烫', '炒饭', '炒面', '炒粉', '炒河粉', '炒米粉', '炒土豆丝', '炒青菜', '炒西兰花', '炒芹菜', '炒莴笋', '炒豆角', '炒茄子']
         try:
-            with open('../config/foodlist.txt', 'r', encoding='utf-8') as food_list_file:
+            foodlist_path = os.path.join(base_dir, 'config', 'foodlist.txt')
+            with open(foodlist_path, 'r', encoding='utf-8') as food_list_file:
                 food = [line.strip() for line in food_list_file.readlines()]
         except Exception as e:
             print(datetime.datetime.now(), "\t", "Error reading foodlist.txt: ", e)
@@ -73,16 +78,19 @@ class XMAndFireReactionFilter(MessageFilter):
     # reload the config file and return the possibility list
     def reload_config(self):
         try:
-            with open('config/xm_and_fire.json', 'r', encoding='utf-8') as config_file:
+            config_path = os.path.join(base_dir, 'config', 'xm_and_fire.json')
+            with open(config_path, 'r', encoding='utf-8') as config_file:
                 self.possibility_list = json.load(config_file)
         except FileNotFoundError:
             self.possibility_list = []
-            with open('config/xm_and_fire.json', 'w', encoding='utf-8') as config_file:
+            config_path = os.path.join(base_dir, 'config', 'xm_and_fire.json')
+            with open(config_path, 'w', encoding='utf-8') as config_file:
                 json.dump(self.possibility_list, config_file, ensure_ascii=False, indent=4)
         return self.possibility_list
 
     def save_config(self, xm_and_fire_possibility):
-        with open('config/xm_and_fire.json', 'w', encoding='utf-8') as file:
+        config_path = os.path.join(base_dir, 'config', 'xm_and_fire.json')
+        with open(config_path, 'w', encoding='utf-8') as file:
             json.dump(xm_and_fire_possibility, file, ensure_ascii=False, indent=4)
 
     def filter(self, message):
@@ -97,10 +105,11 @@ class XMAndFireReactionFilter(MessageFilter):
             self.possibility = 0
             self.possibility_list[message.chat.id] = {'groupid': message.chat.id, 'possibility': 0, 'enabled': False}
             # save change to file
-            with open('config/xm_and_fire.json', 'w', encoding='utf-8') as config_file:
+            config_path = os.path.join(base_dir, 'config', 'xm_and_fire.json')
+            with open(config_path, 'w', encoding='utf-8') as config_file:
                 json.dump(self.possibility_list, config_file, ensure_ascii=False, indent=4)
             # reload the file
-            with open('config/xm_and_fire.json', 'r', encoding='utf-8') as config_file:
+            with open(config_path, 'r', encoding='utf-8') as config_file:
                 self.possibility_list = json.load(config_file)
             return False
 

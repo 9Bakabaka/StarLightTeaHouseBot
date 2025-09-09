@@ -1,6 +1,7 @@
 import datetime
 import json
 import re
+import os
 
 from uuid import uuid4
 from telegram import Update, InlineQueryResultArticle, InputTextMessageContent
@@ -11,7 +12,7 @@ async def inline_query(update: Update, context):
     print(datetime.datetime.now(), "\t", "Calling inlineQuery")
     query = update.inline_query.query.strip()
     try:
-        with open('../config/quotes.json', 'r', encoding='utf-8') as f:
+        with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'config', 'quotes.json'), 'r', encoding='utf-8') as f:
             loadedQuotes = json.load(f)
     except Exception as e:
         print(datetime.datetime.now(), "\t", "Error reading quotes.json: ", e)
