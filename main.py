@@ -5,7 +5,8 @@ import asyncio
 import os
 import shutil
 import nest_asyncio
-nest_asyncio.apply()    # for pycharm
+
+nest_asyncio.apply()  # for pycharm
 
 from functools import partial
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ConversationHandler, filters, InlineQueryHandler
@@ -51,7 +52,8 @@ async def main():
         from modules.jm import jm_comic
         # write absolute download path to jm_dl_option.yml
         base_dir = os.path.dirname(os.path.abspath(__file__))
-        print(datetime.datetime.now(), "\t", "Setting jmcomic download path to ", os.path.join(base_dir, "download", "cache"))
+        print(datetime.datetime.now(), "\t", "Setting jmcomic download path to ",
+              os.path.join(base_dir, "download", "cache"))
         with open(os.path.join(base_dir, 'config', 'jm_dl_option.yml'), 'r', encoding='utf-8') as f:
             lines = f.readlines()
         with open(os.path.join(base_dir, 'config', 'jm_dl_option.yml'), 'w', encoding='utf-8') as f:
@@ -97,13 +99,15 @@ async def main():
     application.add_handler(welcomeMSG_handler)
 
     # xm and fire settings handler
-    from modules.replies import XMAndFireReactionFilter, xm_and_fire, xm_and_fire_settings, WhatToEatFilter, what_to_eat, manual_xm, manual_fire, un_xm
+    from modules.replies import XMAndFireReactionFilter, xm_and_fire, xm_and_fire_settings, WhatToEatFilter, \
+        what_to_eat, manual_xm, manual_fire, un_xm
     # create an object in order to use it in the following xm and fire handlers
     xm_and_fire_reaction_filter = XMAndFireReactionFilter()
     # read possibility for each group from config/xm_and_fire.json, this config file would be in the ram
     xm_and_fire_reaction_filter.reload_config()
     # pass the object to settings function
-    xm_and_fire_settings_handler = CommandHandler('xianmufire', partial(xm_and_fire_settings, xm_and_fire_filter_obj=xm_and_fire_reaction_filter))
+    xm_and_fire_settings_handler = CommandHandler('xianmufire', partial(xm_and_fire_settings,
+                                                                        xm_and_fire_filter_obj=xm_and_fire_reaction_filter))
     application.add_handler(xm_and_fire_settings_handler)
 
     # manual xm and fire handlers
@@ -152,12 +156,12 @@ async def main():
 
             # start the bot
             print(datetime.datetime.now(), "\t", "All handlers are loaded. Starting the bot now...")
-            await application.run_polling()
+            await application.run_polling(
+                timeout=30,
+            )
         except TimedOut:
             print(datetime.datetime.now(), "\t", "Timed out.")
-            pass    # My connection is really really really bad.
-
-
+            pass  # My connection is really really really bad.
 
 
 if __name__ == '__main__':
