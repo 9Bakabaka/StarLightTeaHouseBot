@@ -34,21 +34,21 @@ async def main():
     application.add_handler(status_handler)
 
     # sticker handler
-    if os.getenv("ENABLE_STICKER_HANDLER"):
+    if os.getenv("ENABLE_STICKER_HANDLER").lower() == "true":
         from modules.stickers import get_sticker_id, StickerFilter
         stickerFilter = StickerFilter()
         sticker_handler = MessageHandler(stickerFilter, get_sticker_id)
         application.add_handler(sticker_handler)
 
     # apple CN message handler
-    if os.getenv("ENABLE_APPLE_CN_MSG_HANDLER"):
+    if os.getenv("ENABLE_APPLE_CN_MSG_HANDLER").lower() == "true":
         from modules.replies import AppleCNMSGFilter, apple_cn_msg
         appleCNMSGFilter = AppleCNMSGFilter()
         AppleCNMSG_handler = MessageHandler(appleCNMSGFilter, apple_cn_msg)
         application.add_handler(AppleCNMSG_handler)
 
     # jm comic handler
-    if os.getenv("ENABLE_JM_DOWNLOAD"):
+    if os.getenv("ENABLE_JM_DOWNLOAD").lower() == "true":
         from modules.jm import jm_comic
         # write absolute download path to jm_dl_option.yml
         base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -70,7 +70,7 @@ async def main():
         application.add_handler(jm_comic_handler)
 
     # AI chat handler
-    if os.getenv("ENABLE_AI_CHAT"):
+    if os.getenv("ENABLE_AI_CHAT").lower() == "true":
         from modules.LLM.chat import llm
         AI_chat_handler = CommandHandler('llm', llm)
         application.add_handler(AI_chat_handler)
@@ -126,12 +126,12 @@ async def main():
 
     # message handlers at the end
     # what to eat today handler
-    if os.getenv("ENABLE_WHAT_TO_EAT"):
+    if os.getenv("ENABLE_WHAT_TO_EAT").lower() == "true":
         what_to_eat_filter = WhatToEatFilter()
         what_to_eat_handler = MessageHandler(what_to_eat_filter, what_to_eat)
         application.add_handler(what_to_eat_handler)
     # denno mienmien mao handler
-    if os.getenv("ENABLE_DINNO_MIENMIEN_MAO_HANDLER"):
+    if os.getenv("ENABLE_DINNO_MIENMIEN_MAO_HANDLER").lower() == "true":
         from modules.replies import DennoMienmienMaoFilter, denno_mienmien_mao_nonnon
         denno_mienmien_mao_filter = DennoMienmienMaoFilter()
         dinno_mienmien_mao_handler = MessageHandler(denno_mienmien_mao_filter, denno_mienmien_mao_nonnon)
