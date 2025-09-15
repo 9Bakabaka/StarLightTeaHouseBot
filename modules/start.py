@@ -27,3 +27,8 @@ async def system_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
              f"Memory: {memory_info.percent}%\n"
              f"Network: {ping_result} ms to 8.8.8.8"
     )
+
+# return function not enabled message
+async def function_not_enabled(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print(datetime.datetime.now(), "\t", "Received command for a disabled function.")
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="This function is not enabled. Please contact the administrator.")

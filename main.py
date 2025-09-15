@@ -33,6 +33,12 @@ async def main():
     status_handler = CommandHandler('status', system_status)
     application.add_handler(status_handler)
 
+    # for optional modules
+    # if function enabled in .env
+    #     load module and add handler
+    # else
+    #     add a handler to reply function not enabled message
+
     # sticker handler
     if os.getenv("ENABLE_STICKER_HANDLER").lower() == "true":
         from modules.stickers import get_sticker_id, StickerFilter
@@ -68,12 +74,20 @@ async def main():
             shutil.rmtree('download')
         jm_comic_handler = CommandHandler('jm', jm_comic)
         application.add_handler(jm_comic_handler)
+    else:
+        from modules.start import function_not_enabled
+        sticker_handler = MessageHandler(filters.ALL, function_not_enabled)
+        application.add_handler(sticker_handler)
 
     # AI chat handler
     if os.getenv("ENABLE_AI_CHAT").lower() == "true":
         from modules.LLM.chat import llm
         AI_chat_handler = CommandHandler('llm', llm)
         application.add_handler(AI_chat_handler)
+    else:
+        from modules.start import function_not_enabled
+        sticker_handler = MessageHandler(filters.ALL, function_not_enabled)
+        application.add_handler(sticker_handler)
 
     # group welcome message setting handler
     from modules.GroupWelcome.welcome_messages import NewUserVerify, NewUserFilter, group_welcome_msg_settings
@@ -99,8 +113,7 @@ async def main():
     application.add_handler(welcomeMSG_handler)
 
     # xm and fire settings handler
-    from modules.replies import XMAndFireReactionFilter, xm_and_fire, xm_and_fire_settings, WhatToEatFilter, \
-        what_to_eat, manual_xm, manual_fire, un_xm
+    from modules.replies import XMAndFireReactionFilter, xm_and_fire, xm_and_fire_settings, WhatToEatFilter, what_to_eat, manual_xm, manual_fire, un_xm
     # create an object in order to use it in the following xm and fire handlers
     xm_and_fire_reaction_filter = XMAndFireReactionFilter()
     # read possibility for each group from config/xm_and_fire.json, this config file would be in the ram
@@ -130,12 +143,21 @@ async def main():
         what_to_eat_filter = WhatToEatFilter()
         what_to_eat_handler = MessageHandler(what_to_eat_filter, what_to_eat)
         application.add_handler(what_to_eat_handler)
+    else:
+        from modules.start import function_not_enabled
+        sticker_handler = MessageHandler(filters.ALL, function_not_enabled)
+        application.add_handler(sticker_handler)
+
     # denno mienmien mao handler
     if os.getenv("ENABLE_DINNO_MIENMIEN_MAO_HANDLER").lower() == "true":
         from modules.replies import DennoMienmienMaoFilter, denno_mienmien_mao_nonnon
         denno_mienmien_mao_filter = DennoMienmienMaoFilter()
         dinno_mienmien_mao_handler = MessageHandler(denno_mienmien_mao_filter, denno_mienmien_mao_nonnon)
         application.add_handler(dinno_mienmien_mao_handler)
+    else:
+        from modules.start import function_not_enabled
+        sticker_handler = MessageHandler(filters.ALL, function_not_enabled)
+        application.add_handler(sticker_handler)
 
     # xm and fire reaction handler
     # this handler must be put after all message handlers
