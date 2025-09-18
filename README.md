@@ -5,12 +5,14 @@ This is a telegram bot developed for StarLight Tea house.
 Chinese document is maintained by [BiancoCat](https://github.com/BiancoCat) and may not be up-to-date.  
 Newest update! Longtail can't stand the outdated Chinese doc anymore and updated it on 2025 Sep 08.
 
+# Installation  
+1. Git clone.
+2. Use venv if you want, then `pip install -r requirements.txt`. ~~If you want to use image search function, you will need rust compiler. Use `pip install .` to build the rust module and install them.~~
+3. Configure .env file. Put your token it in .env file as TELEGRAM_BOT_TOKEN. Find BotFather to get one. If you want to use LLM function, put your Deepseek token in .env as DEEPSEEK_API_KEY.   
+4. `python main.py` Make it background or in a screen as you wish.  
+
 # Usage:  
 ### Most of the functions can be toggled in .env
-
-### Before you start...
-Put your token it in .env file as TELEGRAM_BOT_TOKEN. Find BotFather to get one.  
-If you want to use LLM function, put your Deepseek token in .env as DEEPSEEK_API_KEY.
 
 ### About Status
 Use command "/status" to check server status. Including CPU, memory usage and network latency.
@@ -94,3 +96,6 @@ Default model is Deepseek. For now, only Deepseek is supported. Feel free to cha
 Chat with LLM with "/llm \<message\>" or reply a message with "/llm" to send the message.  
 All chats are single-turn with no context saved.
 Also use "/llm" to get usages.
+
+### About image search
+Not finished yet.  
