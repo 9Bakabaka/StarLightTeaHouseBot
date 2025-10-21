@@ -44,8 +44,8 @@ async def AI_chat(update: Update, context: ContextTypes.DEFAULT_TYPE, message_id
         return
 
     # fetch from AI
-    llm = LLM(sys_prompt)
-    AI_result = llm.multi_round_chat(usr_prompt)
+    chat = LLM(sys_prompt)
+    AI_result = chat.multi_round_chat(usr_prompt)
     # apply pre_filters again
     for keyword in pre_filter:
         if keyword in AI_result.lower():
