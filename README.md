@@ -97,5 +97,9 @@ Chat with LLM with "/llm \<message\>" or reply a message with "/llm" to send the
 All chats are single-turn with no context saved.
 Also use "/llm" to get usages.
 
+### About captcha (experimental)  
+Use LLM to generate captcha questions and verify answers. Please understand that LLM can make mistakes.  
+This module have not been used in group yet. But you can try it with "/captcha" command.  
+
 ### About image search
 Not finished yet.  
