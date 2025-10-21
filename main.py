@@ -19,8 +19,8 @@ from dotenv import load_dotenv
 # todo: verification timeout customize
 
 async def main():
-    load_dotenv()
-    # load_dotenv('.env.test')
+    # load_dotenv()
+    load_dotenv('.env.test')
     application = ApplicationBuilder().token(os.getenv("TELEGRAM_BOT_TOKEN")).build()
 
     # start handler
@@ -58,7 +58,7 @@ async def main():
         from modules.jm import jm_comic
         # write absolute download path to jm_dl_option.yml
         base_dir = os.path.dirname(os.path.abspath(__file__))
-        print(datetime.datetime.now(), "\t", "Setting jmcomic download path to ",
+        print(datetime.datetime.now(), "\t", "[main] Setting jmcomic download path to ",
               os.path.join(base_dir, "download", "cache"))
         with open(os.path.join(base_dir, 'config', 'jm_dl_option.yml'), 'r', encoding='utf-8') as f:
             lines = f.readlines()
@@ -111,6 +111,12 @@ async def main():
         fallbacks=[]
     )
     application.add_handler(welcomeMSG_handler)
+
+    # captcha handler
+    # if ... enabled, but not now
+    from modules.GroupWelcome.captcha import captcha
+    captcha_handler = CommandHandler('captcha', captcha)
+    application.add_handler(captcha_handler)
 
     # xm and fire settings handler
     from modules.replies import XMAndFireReactionFilter, xm_and_fire, xm_and_fire_settings, WhatToEatFilter, what_to_eat, manual_xm, manual_fire, un_xm
@@ -173,16 +179,16 @@ async def main():
     while True:
         try:
             # clear received message before bot starts
-            print(datetime.datetime.now(), "\t", "Clearing received messages...")
+            print(datetime.datetime.now(), "\t", "[main] Clearing received messages...")
             await application.bot.get_updates(offset=-1)
 
             # start the bot
-            print(datetime.datetime.now(), "\t", "All handlers are loaded. Starting the bot now...")
+            print(datetime.datetime.now(), "\t", "[main] All handlers are loaded. Starting the bot now...")
             await application.run_polling(
                 timeout=30,
             )
         except TimedOut:
-            print(datetime.datetime.now(), "\t", "Timed out.")
+            print(datetime.datetime.now(), "\t", "[main] Timed out.")
             pass  # My connection is really really really bad.
 
 
