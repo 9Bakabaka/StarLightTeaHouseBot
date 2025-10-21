@@ -19,8 +19,8 @@ from dotenv import load_dotenv
 # todo: verification timeout customize
 
 async def main():
-    # load_dotenv()
-    load_dotenv('.env.test')
+    load_dotenv()
+    # load_dotenv('.env.test')
     application = ApplicationBuilder().token(os.getenv("TELEGRAM_BOT_TOKEN")).build()
 
     # start handler
