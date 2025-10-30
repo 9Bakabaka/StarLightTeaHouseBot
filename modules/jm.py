@@ -42,9 +42,6 @@ def convert_image_folder_to_pdf(directory, pdf_name=None):
             os.chmod(output_path, 0o777)
 
 def download_comic(comic_id):
-    # if download folder does not exist, create it
-    if not os.path.exists(temp_download_path):
-        os.makedirs(temp_download_path, exist_ok=True)
     # clear cache folder
     for file in os.listdir(temp_download_path):
         file_path = os.path.join(temp_download_path, file)
@@ -88,6 +85,10 @@ def download_comic(comic_id):
 
 # download comic from jm and send to chat
 async def jm_comic(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # if download folder does not exist, create it
+    if not os.path.exists(temp_download_path):
+        os.makedirs(temp_download_path, exist_ok=True)
+
     usage_msg = "Usage: /jm <comic_id>\nOr /jm listcache to list cached comics.\nOr /jm clearcache to clear cached comics."
     print(datetime.datetime.now(), "\t", "[jm] Received /jm ", end="")
     parameters = update.message.text.replace('/jm ', '')
