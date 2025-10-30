@@ -88,7 +88,8 @@ Easter egg: 5% chance eat "themselves"(sender's name)
 \\non non!/
 
 ### About jm comic download:
-Use "/jmcomic \<comic name\>" to download jm comic. The downloaded comic will be converted to a PDF file and sent to the chat.  
+Use "/jm \<comic name\>" to download jm comic. The downloaded comic will be converted to a PDF file and sent to the chat.  
+Downloaded comics are cached in ./download permanently. Use /jm listcache to view them and /jm clearcache to remove them.
 **Warning: This function may take a lot of time and resources. If your machine is not powerful enough, the bot may crash.**  
 
 ### About LLM
