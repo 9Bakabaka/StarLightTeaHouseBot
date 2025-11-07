@@ -137,69 +137,86 @@ async def xm_and_fire(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # form security aspect, this is not good and may cause data leak, but I don't want to fix it
 async def xm_and_fire_settings(update: Update, context: ContextTypes.DEFAULT_TYPE, xm_and_fire_filter_obj):
     print(datetime.datetime.now(), "\t", "Received " + update.message.text + ", ", end="")
-    usage_msg = "Usage:\n/xmfire <on/off> Toggle xm and fire reaction.\n/xmfire set <possibility> Set xm and fire possibility in [0, 1].\n/xmfire suppress <minutes> Suppress this function for a period of time. (Not Finished Yet)"
+    usage_msg = "Usage:\n/xianmufire <on/off> Toggle xm and fire reaction.\n/xmfire set <possibility> Set xm and fire possibility in [0, 1].\n/xmfire suppress <minutes> Suppress this function for a period of time. (Not Finished Yet)"
     if update.effective_chat.type not in ['group', 'supergroup']:
         await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text="This command is only available in group.")
         print("Not a group chat.")
         return
     # if only /xmfire, show usage
-    if update.message.text == '/xmfire':
+    if update.message.text == '/xianmufire':
         await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text=usage_msg)
-        print("Showing usage")
+        print(datetime.datetime.now(), "\t", "Received " + update.message.text + ", ", end="")
+        return
+
+    # only group admins can change the settings
+    # if not admin, return
+    if not (await update.effective_chat.get_member(update.effective_user.id)).status in ['administrator',
+                                                                                         'creator']:
+        await context.bot.send_message(chat_id=update.effective_chat.id,
+                                       text="Only group admins can use this command.")
+        print("Not admin. Return now.")
+        return
+
+    # read config file, locate current group and ready to edit
+    xm_and_fire_possibilities = xm_and_fire_filter_obj.reload_config()
+
+    # search for this group in config
+    # if not found, use default group config, if found, use the found group config
+    group = {'groupid': update.effective_chat.id,
+             'possibility': 0,
+             'enabled': False,
+             'supress_until': None
+             }
+    for timer in xm_and_fire_possibilities:
+        if timer['groupid'] == update.effective_chat.id:
+            group['groupid'] = timer.get('groupid', update.effective_chat.id)
+            group['possibility'] = timer.get('possibility', 0)
+            group['enabled'] = timer.get('enabled', False)
+            group['supress_until'] = timer.get('supress_until', None)
+            break
+
+    command = update.message.text.replace('/xianmufire ', '')
+    # command handler
+    if command == 'on':
+        group['enabled'] = True
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="XM and Fire reaction enabled.")
+        print("XM and Fire reaction enabled.")
+    elif command == 'off':
+        group['enabled'] = False
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="XM and Fire reaction disabled.")
+        print("XM and Fire reaction disabled.")
+    elif command.startswith('set'):
+        group['possibility'] = float(command.replace('set ', ''))
+        await context.bot.send_message(chat_id=update.effective_chat.id,
+                                       text="XM and Fire possibility updated.")
+        print("\t", "XM and Fire possibility updated.")
+    elif command == '%':
+        await context.bot.send_message(chat_id=update.effective_chat.id,
+                                       text=f"Current XM and Fire possibility: {group['possibility']}\nEnabled: {group['enabled']}")
+        print("Showing current settings.")
+    elif command.startswith('supress'):
+        await context.bot.send_message(chat_id=update.effective_chat.id,
+                                       text="This function is not finished yet.")
+        print("Suppress function not finished yet.")
     else:
-        # only group admins can change the settings
-        # if not admin, return
-        if not (await update.effective_chat.get_member(update.effective_user.id)).status in ['administrator',
-                                                                                             'creator']:
-            await context.bot.send_message(chat_id=update.effective_chat.id,
-                                           text="Only group admins can use this command.")
-            return
+        # default aka not recognized
+        await context.bot.send_message(chat_id=update.effective_chat.id,
+                                       text=usage_msg)
+        print("Command not recognized. Showing usage")
 
-        # read config file, locate current group and ready to edit
-        xm_and_fire_possibilities = xm_and_fire_filter_obj.reload_config()
+    # save changes to list
+    if group not in xm_and_fire_possibilities:
+        xm_and_fire_possibilities.append(group)
+    else:
+        xm_and_fire_possibilities[xm_and_fire_possibilities.index(group)] = group
 
-        # search for this group in config
-        # if not found, use default group config, if found, use the found group config
-        group = {'groupid': update.effective_chat.id,
-                 'possibility': 0,
-                 'enabled': False}
-        for timer in xm_and_fire_possibilities:
-            if timer['groupid'] == update.effective_chat.id:
-                group = timer
-                break
+    # save config file
+    xm_and_fire_filter_obj.save_config(xm_and_fire_possibilities)
 
-        # command handler
-        if update.message.text == '/xmfire on':
-            group['enabled'] = True
-            await context.bot.send_message(chat_id=update.effective_chat.id, text="XM and Fire reaction enabled.")
-            print("XM and Fire reaction enabled.")
-        elif update.message.text == '/xmfire off':
-            group['enabled'] = False
-            await context.bot.send_message(chat_id=update.effective_chat.id, text="XM and Fire reaction disabled.")
-            print("XM and Fire reaction disabled.")
-        elif update.message.text.startswith('/xmfire set '):
-            group['possibility'] = float(update.message.text.replace('/xmfire set ', ''))
-            await context.bot.send_message(chat_id=update.effective_chat.id,
-                                           text="XM and Fire possibility updated.")
-            print("XM and Fire possibility updated.")
-        else:
-            # default aka not recognized
-            await context.bot.send_message(chat_id=update.effective_chat.id,
-                                           text=usage_msg)
-
-        # save changes to list
-        if group not in xm_and_fire_possibilities:
-            xm_and_fire_possibilities.append(group)
-        else:
-            xm_and_fire_possibilities[xm_and_fire_possibilities.index(group)] = group
-
-        # save config file
-        xm_and_fire_filter_obj.save_config(xm_and_fire_possibilities)
-
-        # reload config file
-        xm_and_fire_filter_obj.reload_config()
+    # reload config file
+    xm_and_fire_filter_obj.reload_config()
 
 # manual xm and fire handlers
 async def manual_xm(update: Update, context: ContextTypes.DEFAULT_TYPE):
