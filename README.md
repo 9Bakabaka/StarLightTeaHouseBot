@@ -64,12 +64,16 @@ If you want to send your customized quote, @bot and type "\>\>\[your content\]".
 A lot of members in StarLight Tea House are doing such thing:  
 Reply a random message with "羡慕" or react it with "🔥".  
 For **every message**, bot would have a probability to do such thing.  
-Use "/xmfire <parameter>" to configure this function.  
-Usages (Also try "/xmfire" for usages in chat):
+Use "/xianmufire <parameter>" to configure this function.  
+Usages (Also try "/xianmufire" for usages in chat):
 - Toggle function:  
-  `/xmfire <on/off>`  
+  `/xianmufire <on/off>`  
 - Set probability of triggering the function:  
-  `/xmfire set <probability>`  
+  `/xianmufire set <probability>`  
+- View current settings:  
+  `/xianmufire %`
+- Suppress automatic reaction for a period of time:  
+  `/xianmufire suppress <minutes>`
 
 When the function is triggered, bot would reply "羡慕"(50%) or react "🔥"(50%) to the message.  
 Manual 羡慕 and fire reaction are also supported. Use /xm \<message link\> or /fire \<message link\>. Or just reply /xm or /fire to the message.  
