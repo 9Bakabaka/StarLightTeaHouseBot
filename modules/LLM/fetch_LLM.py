@@ -8,13 +8,13 @@ class LLM:
     client = None
     model = "deepseek-chat"  # Make it static for now
     base_url = "https://api.deepseek.com"
-    messages = []
     # [{"role": "system", "content": sys_prompt},
     # {"role": "user", "content": user_prompt},
     # {"role": "assistant", "content": "response"}]
     stream = False
 
     def __init__(self, sys_prompt=None):
+        self.messages = []
         self.messages.append({"role": "system", "content": sys_prompt})
         self.client = OpenAI(api_key=os.getenv("DEEPSEEK_API_KEY"), base_url=self.base_url)
 
