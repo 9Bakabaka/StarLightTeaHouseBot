@@ -13,7 +13,6 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, Con
 from dotenv import load_dotenv
 
 
-# todo: silence for x minutes
 # todo: 尾巴触电
 # todo: add quote, print quote list and delete quote
 # todo: verification timeout customize
@@ -68,26 +67,22 @@ async def main():
                     f.write(f'  base_dir: "{os.path.join(base_dir, "download", "cache")}"\n')
                 else:
                     f.write(line)
-
-        # remove download folder if exists aka clear cache
-        if os.path.exists('download'):
-            shutil.rmtree('download')
         jm_comic_handler = CommandHandler('jm', jm_comic)
-        application.add_handler(jm_comic_handler)
     else:
         from modules.start import function_not_enabled
-        sticker_handler = MessageHandler(filters.ALL, function_not_enabled)
-        application.add_handler(sticker_handler)
+        jm_comic_handler = CommandHandler('jm', function_not_enabled)
+
+    application.add_handler(jm_comic_handler)
 
     # AI chat handler
     if os.getenv("ENABLE_AI_CHAT").lower() == "true":
         from modules.LLM.chat import llm
         AI_chat_handler = CommandHandler('llm', llm)
-        application.add_handler(AI_chat_handler)
     else:
         from modules.start import function_not_enabled
-        sticker_handler = MessageHandler(filters.ALL, function_not_enabled)
-        application.add_handler(sticker_handler)
+        AI_chat_handler = CommandHandler('llm', function_not_enabled)
+
+    application.add_handler(AI_chat_handler)
 
     # group welcome message setting handler
     from modules.GroupWelcome.welcome_messages import NewUserVerify, NewUserFilter, group_welcome_msg_settings
@@ -148,11 +143,11 @@ async def main():
     if os.getenv("ENABLE_WHAT_TO_EAT").lower() == "true":
         what_to_eat_filter = WhatToEatFilter()
         what_to_eat_handler = MessageHandler(what_to_eat_filter, what_to_eat)
-        application.add_handler(what_to_eat_handler)
     else:
         from modules.start import function_not_enabled
-        sticker_handler = MessageHandler(filters.ALL, function_not_enabled)
-        application.add_handler(sticker_handler)
+        what_to_eat_handler = CommandHandler('eattoday', function_not_enabled)
+
+    application.add_handler(what_to_eat_handler)
 
     # denno mienmien mao handler
     if os.getenv("ENABLE_DINNO_MIENMIEN_MAO_HANDLER").lower() == "true":
@@ -160,10 +155,6 @@ async def main():
         denno_mienmien_mao_filter = DennoMienmienMaoFilter()
         dinno_mienmien_mao_handler = MessageHandler(denno_mienmien_mao_filter, denno_mienmien_mao_nonnon)
         application.add_handler(dinno_mienmien_mao_handler)
-    else:
-        from modules.start import function_not_enabled
-        sticker_handler = MessageHandler(filters.ALL, function_not_enabled)
-        application.add_handler(sticker_handler)
 
     # xm and fire reaction handler
     # this handler must be put after all message handlers
