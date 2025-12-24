@@ -115,7 +115,9 @@ class NewUserVerify:
             timer_task = user_data.get('timer_task')
             if timer_task:
                 timer_task.cancel()
-            del self.new_user_data[userID]
+            # Check if user exists before deletion to avoid KeyError
+            if userID in self.new_user_data:
+                del self.new_user_data[userID]
             print(datetime.datetime.now(), "\t", "User_data updated to: ", self.new_user_data)
             await context.bot.send_message(
                 chat_id=update.effective_chat.id,
@@ -134,17 +136,18 @@ class NewUserVerify:
         print(datetime.datetime.now(), "\t", "VerifyTimer Called")
         await asyncio.sleep(self.verification_timeout)
         # if new_member_id is still in user_data after timeout
-        userID = update.message.from_user.id
-        user_data = self.new_user_data.get(userID, {})
         if new_member_id in self.new_user_data:
             print(datetime.datetime.now(), "\t", f"User {new_member_id} has not verified their account in time.")
             # put your custom methods here
             # for example, I will call notify_admin from notify_admin.py
             notify_admin.notify_admin()
+            user_data = self.new_user_data.get(new_member_id, {})
             timer_task = user_data.get('timer_task')
             if timer_task:
                 timer_task.cancel()
-            del self.new_user_data[userID]
+            # Check if user exists before deletion to avoid KeyError
+            if new_member_id in self.new_user_data:
+                del self.new_user_data[new_member_id]
         return
 
     async def clear_verify_pool(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
