@@ -24,7 +24,10 @@ class NewUserVerify:
     # If a new user joins the group, send a welcome message
     WaitingForReply = 1
     verification_timeout = 300  # seconds
-    new_user_data = {}
+
+    def __init__(self):
+        # keep per-instance state; avoid class-level sharing surprises
+        self.new_user_data = {}
 
     async def send_group_welcome_msg(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         for new_member in update.message.new_chat_members:
@@ -88,7 +91,7 @@ class NewUserVerify:
     async def verify_twitter_user_name(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         print(datetime.datetime.now(), "\t", "VerifyTwitterUserName Called")
         userID = update.message.from_user.id
-        user_data = self.new_user_data.get(userID, {})
+        user_data = self.new_user_data.get(userID)
         try:
             config_path = os.path.join(base_dir, 'config', 'welcome_msg_config.json')
             with open(config_path, 'r', encoding='utf-8') as file:
@@ -109,13 +112,12 @@ class NewUserVerify:
                 verify_fail_msg = group['verify_fail_msg']
                 break
 
-        if update.message.text and re.match(verify_filter, update.message.text) and user_data.get('NewUser', True):
+        if update.message.text and re.match(verify_filter, update.message.text) and user_data and user_data.get('NewUser'):
             print(datetime.datetime.now(), "\t", "Delete the new user from new_user_data")
             # remove the timer
             timer_task = user_data.get('timer_task')
             if timer_task:
                 timer_task.cancel()
-            # Check if user exists before deletion to avoid KeyError
             if userID in self.new_user_data:
                 del self.new_user_data[userID]
             print(datetime.datetime.now(), "\t", "User_data updated to: ", self.new_user_data)
@@ -145,16 +147,22 @@ class NewUserVerify:
             timer_task = user_data.get('timer_task')
             if timer_task:
                 timer_task.cancel()
-            # Check if user exists before deletion to avoid KeyError
             if new_member_id in self.new_user_data:
                 del self.new_user_data[new_member_id]
         return
 
     async def clear_verify_pool(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         print(datetime.datetime.now(), "\t", "ClearVerifyPool Called")
-        # clear all new user data
+        # cancel any pending timers before clearing
+        for _, user_data in list(self.new_user_data.items()):
+            timer_task = user_data.get('timer_task')
+            if timer_task:
+                timer_task.cancel()
         self.new_user_data = {}
         print(datetime.datetime.now(), "\t", "User_data updated to: ", self.new_user_data)
+
+# shared instance to be reused across handlers
+new_user_verify_instance = NewUserVerify()
 
 # group welcome message setting handler
 async def group_welcome_msg_settings(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -241,8 +249,7 @@ async def group_welcome_msg_settings(update: Update, context: ContextTypes.DEFAU
                                            text="Group verify fail message updated.")
             print("Group verify fail message updated.")
         elif update.message.text.startswith('/groupwelcome approve'):
-            new_user_verify = NewUserVerify()
-            await new_user_verify.verify_twitter_user_name(update, context)
+            await new_user_verify_instance.clear_verify_pool(update, context)
             await context.bot.send_message(chat_id=update.effective_chat.id, text="Verify pool cleared.")
             print("Verify pool cleared.")
         else:

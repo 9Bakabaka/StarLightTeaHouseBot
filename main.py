@@ -85,12 +85,12 @@ async def main():
     application.add_handler(AI_chat_handler)
 
     # group welcome message setting handler
-    from modules.GroupWelcome.welcome_messages import NewUserVerify, NewUserFilter, group_welcome_msg_settings
+    from modules.GroupWelcome.welcome_messages import NewUserVerify, NewUserFilter, group_welcome_msg_settings, new_user_verify_instance
     group_welcome_msg_handler = CommandHandler('groupwelcome', group_welcome_msg_settings)
     application.add_handler(group_welcome_msg_handler)
 
     # new user handler
-    new_user_verify = NewUserVerify()
+    new_user_verify = new_user_verify_instance
     newUserFilter = NewUserFilter()
     welcomeMSG_handler = ConversationHandler(
         entry_points=[MessageHandler(newUserFilter, new_user_verify.send_group_welcome_msg)],
