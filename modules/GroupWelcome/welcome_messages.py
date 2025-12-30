@@ -92,6 +92,12 @@ class NewUserVerify:
         print(datetime.datetime.now(), "\t", "VerifyTwitterUserName Called")
         userID = update.message.from_user.id
         user_data = self.new_user_data.get(userID)
+
+        # If user is not in verification pool (approved or timed out), end conversation
+        if not user_data or not user_data.get('NewUser'):
+            print(datetime.datetime.now(), "\t", f"User {userID} not in verification pool, ending conversation")
+            return ConversationHandler.END
+
         try:
             config_path = os.path.join(base_dir, 'config', 'welcome_msg_config.json')
             with open(config_path, 'r', encoding='utf-8') as file:
@@ -107,12 +113,12 @@ class NewUserVerify:
         for group in welcome_msg_config:
             if group['groupid'] == update.effective_chat.id:
                 verify_filter = group['verify_filter']
-                print("Verify filter: ", verify_filter)
+                print("[welcome_messages] Verify filter: ", verify_filter)
                 verify_msg = group['verify_msg']
                 verify_fail_msg = group['verify_fail_msg']
                 break
 
-        if update.message.text and re.match(verify_filter, update.message.text) and user_data and user_data.get('NewUser'):
+        if update.message.text and re.match(verify_filter, update.message.text):
             print(datetime.datetime.now(), "\t", "Delete the new user from new_user_data")
             # remove the timer
             timer_task = user_data.get('timer_task')
@@ -175,13 +181,13 @@ async def group_welcome_msg_settings(update: Update, context: ContextTypes.DEFAU
     if update.effective_chat.type not in ['group', 'supergroup']:
         await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text="This command is only available in group.")
-        print("Not a group chat.")
+        print("[welcome_messages] Not a group chat.")
         return
     # if only /groupwelcome, show usage
     if update.message.text == '/groupwelcome':
         await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text=usage_msg)
-        print("Showing usage")
+        print("[welcome_messages] Showing usage")
     else:
         # only group admins can change the settings
         # if not admin, return
@@ -218,40 +224,40 @@ async def group_welcome_msg_settings(update: Update, context: ContextTypes.DEFAU
         if update.message.text == '/groupwelcome on':
             group['welcome'] = True
             await context.bot.send_message(chat_id=update.effective_chat.id, text="Welcome message enabled.")
-            print("Welcome message enabled.")
+            print("[welcome_messages] Welcome message enabled.")
         elif update.message.text == '/groupwelcome off':
             group['welcome'] = False
             await context.bot.send_message(chat_id=update.effective_chat.id, text="Welcome message disabled.")
-            print("Welcome message disabled.")
+            print("[welcome_messages] Welcome message disabled.")
         elif update.message.text.startswith('/groupwelcome setmsg '):
             group['message'] = update.message.text.replace('/groupwelcome setmsg ', '')
             await context.bot.send_message(chat_id=update.effective_chat.id, text="Welcome message updated.")
-            print("Welcome message updated.")
+            print("[welcome_messages] Welcome message updated.")
         elif update.message.text.startswith('/groupwelcome verify on'):
             group['verify'] = True
             await context.bot.send_message(chat_id=update.effective_chat.id, text="Group verify enabled.")
-            print("Group verify enabled.")
+            print("[welcome_messages] Group verify enabled.")
         elif update.message.text.startswith('/groupwelcome verify off'):
             group['verify'] = False
             await context.bot.send_message(chat_id=update.effective_chat.id, text="Group verify disabled.")
-            print("Group verify disabled.")
+            print("[welcome_messages] Group verify disabled.")
         elif update.message.text.startswith('/groupwelcome vffilter '):
             group['verify_filter'] = update.message.text.replace('/groupwelcome vffilter ', '')
             await context.bot.send_message(chat_id=update.effective_chat.id, text="Group verify filter updated.")
-            print("Group verify filter updated.")
+            print("[welcome_messages] Group verify filter updated.")
         elif update.message.text.startswith('/groupwelcome setvfmsg '):
             group['verify_msg'] = update.message.text.replace('/groupwelcome setvfmsg ', '')
             await context.bot.send_message(chat_id=update.effective_chat.id, text="Group verify message updated.")
-            print("Group verify message updated.")
+            print("[welcome_messages] Group verify message updated.")
         elif update.message.text.startswith('/groupwelcome setvffailmsg '):
             group['verify_fail_msg'] = update.message.text.replace('/groupwelcome setvffailmsg ', '')
             await context.bot.send_message(chat_id=update.effective_chat.id,
                                            text="Group verify fail message updated.")
-            print("Group verify fail message updated.")
+            print("[welcome_messages] Group verify fail message updated.")
         elif update.message.text.startswith('/groupwelcome approve'):
             await new_user_verify_instance.clear_verify_pool(update, context)
             await context.bot.send_message(chat_id=update.effective_chat.id, text="Verify pool cleared.")
-            print("Verify pool cleared.")
+            print("[welcome_messages] Verify pool cleared.")
         else:
             # default aka not recognized
             await context.bot.send_message(chat_id=update.effective_chat.id,
