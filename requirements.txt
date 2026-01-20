@@ -3,15 +3,17 @@ anyio==4.6.0
 certifi==2024.8.30
 cffi==1.17.1
 charset-normalizer==3.4.0
-commonX==0.6.37
+commonX==0.6.40
 curl_cffi==0.10.0
 distro==1.9.0
 h11==0.14.0
 httpcore==1.0.5
 httpx==0.27.2
 idna==3.10
+image_search @ file:///Users/LuoyuanGu/PycharmProjects/tgBot/ImageSearch/target/wheels/image_search-0.1.0-cp312-cp312-macosx_11_0_arm64.whl#sha256=3a23e2a7a5afc9debea79d47ef97d56fe96f34a1f1023b8c0fd4d75df354816b
 jiter==0.9.0
-jmcomic==2.5.32
+jmcomic==2.6.11
+maturin==1.9.4
 nest-asyncio==1.6.0
 openai==1.68.2
 pillow==11.1.0
@@ -22,6 +24,9 @@ pycryptodome==3.22.0
 pydantic==2.10.6
 pydantic_core==2.27.2
 PyPDF2==3.0.1
+PyQt5==5.15.11
+PyQt5-Qt5==5.15.15
+PyQt5_sip==12.15.0
 python-dotenv==1.1.1
 python-telegram-bot==21.6
 PyYAML==6.0.2
