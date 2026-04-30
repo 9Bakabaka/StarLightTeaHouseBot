@@ -3,10 +3,11 @@ import datetime
 
 from openai import OpenAI, APIStatusError
 
+# from liulianmao import openai_chat_completion
 
 class LLM:
     client = None
-    model = "deepseek-chat"  # Make it static for now
+    model = "deepseek-v4-flash"  # Make it static for now
     base_url = "https://api.deepseek.com"
     # [{"role": "system", "content": sys_prompt},
     # {"role": "user", "content": user_prompt},
@@ -42,7 +43,11 @@ class LLM:
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=self.messages,
-                stream=self.stream
+                stream=self.stream,
+                extra_body={
+                    "thinking": {"type": "enabled"},
+                    "reasoning_effort": "high"
+                }
             )
             if not response:
                 print(datetime.datetime.now(), "\t", "[fetch_LLM.send_payload] Error: Response is None.")
@@ -58,6 +63,8 @@ class LLM:
             else:
                 print(datetime.datetime.now(), "\t", f"[fetch_LLM.send_payload] Error: APIStatusError: {e}")
             return "Error"
+        
+        # return openai_chat_completion(prompt_question=self.messages,prompt_system="",model=self.model)
 
     def multi_round_chat(self, user_prompt):
         response = None
