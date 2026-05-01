@@ -44,7 +44,7 @@ If the new user doesn't send it, bot would notify group admin. (Define your own 
 All welcome messages and settings are stored in welcome_msg_config.json.  
 
 ### About quotes:
-Create a file named "quotes.json" and put quotes like this:
+Create a file named "quotes.json" in /config and put quotes like this:
 ```json
 [
     {
@@ -97,10 +97,26 @@ Downloaded comics are cached in ./download permanently. Use /jm listcache to vie
 **Warning: This function may take a lot of time and resources. If your machine is not powerful enough, the bot may crash.**  
 
 ### About LLM
-Default model is Deepseek. For now, only Deepseek is supported. Feel free to change code in modules/LLM to add more models.
+Create a file named "llm_endpoints.json" in /config and fill it like:
+```json
+{
+  "current_model": "deepsleep(-v-)*zzz",
+  "endpoints": [
+    {
+      "type": "openai",
+      "alias": "deepsleep(-v-)*zzz",
+      "model": "gpt-4o",
+      "base_url": "https://api.mysupermodel.oyasumi",
+      "api_key": "sk-He11oYourComputerHave1ndianP0ison"
+    }
+  ]
+}
+```
+For now, only openai apis can be used.
 Chat with LLM with "/llm \<message\>" or reply a message with "/llm" to send the message.  
 All chats are single-turn with no context saved.
 Also use "/llm" to get usages.
+Use "/llminfo" to list all models and "/llminfo set \<model alias\>" to select a model.
 
 ### About captcha (experimental)  
 Use LLM to generate captcha questions and verify answers. Please understand that LLM can make mistakes.  

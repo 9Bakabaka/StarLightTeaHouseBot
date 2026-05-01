@@ -260,8 +260,7 @@ async def group_welcome_msg_settings(update: Update, context: ContextTypes.DEFAU
             print("[welcome_messages] Verify pool cleared.")
         else:
             # default aka not recognized
-            await context.bot.send_message(chat_id=update.effective_chat.id,
-                                           text=usage_msg)
+            await context.bot.send_message(chat_id=update.effective_chat.id, text=usage_msg)
 
         # save config file
         if group not in welcome_msg_config:

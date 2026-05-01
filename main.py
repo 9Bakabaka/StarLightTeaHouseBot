@@ -77,12 +77,16 @@ async def main():
     # AI chat handler
     if os.getenv("ENABLE_AI_CHAT").lower() == "true":
         from modules.LLM.chat import llm
+        from modules.LLM.endpoint_settings import llminfo
         AI_chat_handler = CommandHandler('llm', llm)
+        LLM_info_handler = CommandHandler('llminfo', llminfo)
     else:
         from modules.start import function_not_enabled
         AI_chat_handler = CommandHandler('llm', function_not_enabled)
+        LLM_info_handler = CommandHandler('llminfo', function_not_enabled)
 
     application.add_handler(AI_chat_handler)
+    application.add_handler(LLM_info_handler)
 
     # group welcome message setting handler
     from modules.GroupWelcome.welcome_messages import NewUserVerify, NewUserFilter, group_welcome_msg_settings, new_user_verify_instance

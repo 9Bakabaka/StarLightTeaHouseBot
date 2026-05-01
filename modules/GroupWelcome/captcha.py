@@ -5,7 +5,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 from telegram.ext import MessageHandler, filters
 
-from modules.LLM.fetch_LLM import LLM
+from modules.LLM.fetch_openai_LLM import openai_request
 
 # Track users currently undergoing captcha (per chat & user)
 _captcha_inflight = set()
@@ -89,7 +89,7 @@ async def captcha_thread(update: Update, context: ContextTypes.DEFAULT_TYPE):
         usr_prompt = "After user response you should verify the answer by only responding with 'T' or 'F'."
 
         # fetch from LLM (offload sync calls to a thread to avoid blocking the event loop)
-        llm = LLM(sys_prompt)
+        llm = openai_request(sys_prompt)
         captcha_title = await asyncio.to_thread(llm.multi_round_chat, usr_prompt)
 
         await context.bot.edit_message_text(
