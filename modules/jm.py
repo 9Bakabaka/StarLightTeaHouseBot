@@ -139,10 +139,26 @@ def download_comic(comic_id):
     option = jmcomic.create_option_by_file(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'config', 'jm_dl_option.yml'))
     jmcomic.download_album(comic_id, option)
     # convert comic to pdf, by chapter
+
+    # here is some tricky situations
+    # some of the mangas, would be in separate folders, so it would like
+    # /cache/manga_chapter 1 /cache/manga_chapter2
+    # but some of them would be, just images, like
+    # /cache/00001.png /cache/00002.png
+
+    # Check if there are scattered image files in the cache directory
+    has_image_files = any(f.endswith('.png') for f in os.listdir(temp_download_path))
+
+    # Process subdirectories
     for folders in sorted(os.listdir(temp_download_path)):  # only process folders in /download
         folder_path = os.path.join(temp_download_path, folders)
         if os.path.isdir(folder_path):
             convert_image_folder_to_pdf(folder_path)
+
+    # If there are scattered image files, convert them to PDF
+    if has_image_files:
+        convert_image_folder_to_pdf(temp_download_path)
+
     # combine all chapters into one pdf
     convert_image_folder_to_pdf(temp_download_path, f"{comic_id}.pdf")
     # clean up
