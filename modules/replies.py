@@ -361,3 +361,147 @@ async def delete_xm_msg(context, chat_id, message):
         return
     await context.bot.delete_message(chat_id=chat_id, message_id=message.id)
     print("Deleting 羡慕")
+
+class ls:
+    cache_file_path = os.path.join(base_dir, 'config', 'member_cache.json')
+    member_cache = {}  # {chat_id: {username: user_id, ...}}
+
+    # message handler, catch message and cache to member cache
+    async def cache_updater(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if update.message is None:  # not sure, if edit message return?
+            return
+        try:
+            # Get sender's username and user_id
+            user = update.message.from_user
+            user_id = user.id
+            username = user.username
+            # Skip if user has no username
+            if not username:
+                return
+
+            # Add @ prefix to username for storage
+            username_with_at = f"@{username}"
+
+            chat_id = update.effective_chat.id
+
+            # Load current cache
+            self.member_cache = self.load_member_cache()
+
+            # Initialize chat cache if not exists
+            if chat_id not in self.member_cache:
+                self.member_cache[chat_id] = {}
+
+            chat_member_cache = self.member_cache[chat_id]
+
+            # Check if this username already exists in cache
+            if username_with_at in chat_member_cache:
+                # Username already exists, check if user_id matches
+                if chat_member_cache[username_with_at] == user_id:
+                    # Everything matches, no update needed
+                    return
+                else:
+                    # Username exists but user_id changed, update it
+                    print(datetime.datetime.now(), f"[cache_updater] User ID changed for {username_with_at}: {chat_member_cache[username_with_at]} -> {user_id}")
+                    chat_member_cache[username_with_at] = user_id
+            else:
+                # New username found, add to cache
+                print(datetime.datetime.now(), f"[cache_updater] New member found: {username_with_at} (ID: {user_id})")
+                chat_member_cache[username_with_at] = user_id
+
+            # Update the cache and save to file
+            self.member_cache[chat_id] = chat_member_cache
+            self.save_member_cache(self.member_cache)
+
+        except Exception as e:
+            print(datetime.datetime.now(), f"[cache_updater] Error: {e}")
+
+    def save_member_cache(self, member_cache: dict):
+        with open(self.cache_file_path, 'w', encoding='utf-8') as f:
+            json.dump(member_cache, f, ensure_ascii=False, indent=2)
+        print(f"Member cache saved to {self.cache_file_path}")
+
+    def load_member_cache(self) -> dict:
+        try:
+            with open(self.cache_file_path, 'r', encoding='utf-8') as f:
+                cache = json.load(f)
+            # json keys are strings, convert chat_id keys back to int
+            return {int(k): v for k, v in cache.items()}
+        except FileNotFoundError:
+            print(f"{self.cache_file_path} not found, returning empty cache.")
+            return {}
+        except json.JSONDecodeError:
+            print(f"{self.cache_file_path} is corrupted, returning empty cache.")
+            return {}
+
+    async def ls(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        print(datetime.datetime.now(), "\t", "[replies.ls] Received /ls")
+        usage_msg = "config  download  LICENSE  modules  README.md  requirements.txt  docker  image_search  main.py  pyproject.toml  README_zh.md  tools"
+        # TODO: read config file if ls enabled
+        ls_enabled = True
+
+        # If not enabled
+        if ls_enabled == False:
+            print(datetime.datetime.now(), "\t", "[replies.ls] ls not enabled. Sending default")
+            await context.bot.send_message(chat_id=update.effective_chat.id, text=usage_msg)
+            return
+
+        # If enabled
+        print(datetime.datetime.now(), "\t", "[replies.ls] ls enabled. Sending lift skirt.")
+        # user 1 lift skirt of user 2
+        # extract user 2 from /ls @user2 or /ls@bot @user2
+        user1_name = update.message.from_user.full_name
+        user2_username = None
+        user2_id = None
+
+        # Check message entities for mentions (both @username and text_mention for users without username)
+        if update.message.entities:
+            for entity in update.message.entities:
+                if entity.type == 'mention':
+                    # @username mention (user has username)
+                    user2_username = update.message.text[entity.offset:entity.offset + entity.length]
+                    print(datetime.datetime.now(), "\t", f"[replies.ls] Found @username mention: {user2_username}")
+                    break
+                elif entity.type == 'text_mention':
+                    # text_mention for users without username
+                    user2_id = entity.user.id
+                    print(datetime.datetime.now(), "\t", f"[replies.ls] Found text_mention for user without username: ID {user2_id}")
+                    break
+
+        # If no mention found in entities, check for text-based format
+        if not user2_username and not user2_id:
+            if re.match(r'^/ls@.* .+', update.message.text):
+                user2_username = re.match(r'^/ls@.* (.+)', update.message.text).group(1)
+            elif re.match(r'^/ls .+', update.message.text):
+                user2_username = re.match(r'^/ls (.+)', update.message.text).group(1)
+            elif update.message.text == "/ls":
+                # Check if this message is a reply, if so, extract user from reply_to_message
+                if update.message.reply_to_message:
+                    user2_id = update.message.reply_to_message.from_user.id
+                    print(datetime.datetime.now(), "\t", f"[replies.ls] Extracting user directly from reply_to_message: ID {user2_id}")
+                else:   # if not reply to a message, mean user 1 lift their own skirt, send response and return
+                    print(datetime.datetime.now(), "\t", f"{user1_name} lifted their own skirt. Return.")
+                    await context.bot.send_message(chat_id=update.effective_chat.id, text=f"{user1_name} 提起了自己的裙摆。")
+                    return
+            else:   # user lift skirt of theirself
+                await context.bot.send_message(chat_id=update.effective_chat.id, text=usage_msg)
+                print(datetime.datetime.now(), "\t", "[replies.ls] Showing usage")
+                return
+
+        # if got user2 username and not get user2_id, match id from cache
+        # get member_cache for current chat
+        if user2_username and not user2_id:
+            chat_member_cache = self.member_cache.get(update.effective_chat.id, {})
+            user2_id = chat_member_cache.get(user2_username)
+
+        # till here, we can get user2 id by text_mention, reply or cache
+        if user2_id:
+            member = await context.bot.get_chat_member(update.effective_chat.id, user2_id)
+            user2_name = member.user.full_name
+        else:   # if all three methods fail, use username without @ to fallback
+            user2_name = user2_username.lstrip("@")
+
+        ls_msg = f"{user1_name} 轻轻提起了 {user2_name} 的裙摆。"
+
+        # finally, send lift skirt message
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=ls_msg)
+

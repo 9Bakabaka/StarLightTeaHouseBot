@@ -18,8 +18,8 @@ from dotenv import load_dotenv
 # todo: verification timeout customize
 
 async def main():
-    load_dotenv()
-    # load_dotenv('.env.test')
+    # load_dotenv()
+    load_dotenv('.env.test')
     application = ApplicationBuilder().token(os.getenv("TELEGRAM_BOT_TOKEN")).build()
 
     # start handler
@@ -142,7 +142,17 @@ async def main():
     backdoor_delete_handler = CommandHandler('bddel', backdoor_del)
     application.add_handler(backdoor_delete_handler)
 
+    # keep ls at the end of command handler to make ls handlers next to each other...
+    from modules.replies import ls
+    ls_instance = ls()
+    ls_handler = CommandHandler('ls', ls_instance.ls)
+    application.add_handler(ls_handler)
+
     # message handlers at the end
+    # ls handler
+    ls_cache_handler = MessageHandler(None, ls_instance.cache_updater)
+    application.add_handler(ls_cache_handler)
+
     # what to eat today handler
     if os.getenv("ENABLE_WHAT_TO_EAT").lower() == "true":
         what_to_eat_filter = WhatToEatFilter()
@@ -169,6 +179,9 @@ async def main():
     # inline mentioned handler
     from modules.inline import inline_query
     application.add_handler(InlineQueryHandler(inline_query))
+
+
+    # end of registation
 
     from telegram.error import TimedOut
     while True:
