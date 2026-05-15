@@ -524,7 +524,7 @@ class ls:
                 user2_username = re.match(r'^/ls@.* (.+)', update.message.text).group(1)
             elif re.match(r'^/ls .+', update.message.text):
                 user2_username = re.match(r'^/ls (.+)', update.message.text).group(1)
-            elif update.message.text == "/ls" or "/ls@"+context.bot.username == update.message.text:
+            elif update.message.text == "/ls" or update.message.text.startswith("/ls@" + context.bot.username):
                 # Check if this message is a reply, if so, extract user from reply_to_message
                 if update.message.reply_to_message:
                     user2_id = update.message.reply_to_message.from_user.id
