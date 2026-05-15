@@ -1,15 +1,20 @@
 import datetime
 import re
+import os
 
 from telegram import Update
 from telegram.ext import ContextTypes
+
+
+def _get_admin_list():
+    return [admin_id.strip() for admin_id in os.getenv("ADMIN_LIST", "").split(",") if admin_id.strip()]
 
 # backdoor to send message in any group
 # aha not a real back door
 async def backdoor(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(datetime.datetime.now(), "\t", "Received /bd.")
     # only Longtail can use this backdoor
-    if not update.message.from_user.id == 5418690874:   # 5418690874: Longtail, change as you wish
+    if str(update.message.from_user.id) not in _get_admin_list():
         print(datetime.datetime.now(), "\t", "Not Longtail.")
         await context.bot.send_message(chat_id=update.effective_chat.id, text="You are not my master. I would refuse your request.")
         return
@@ -39,7 +44,7 @@ async def backdoor(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def backdoor_del(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(datetime.datetime.now(), "\t", "Received /bddel.")
     # only Longtail can use this backdoor
-    if not update.message.from_user.id == 5418690874:   # 5418690874: Longtail, change as you wish
+    if str(update.message.from_user.id) not in _get_admin_list():
         print(datetime.datetime.now(), "\t", "Not Longtail.")
         await context.bot.send_message(chat_id=update.effective_chat.id, text="You are not my master. I would refuse your request.")
         return

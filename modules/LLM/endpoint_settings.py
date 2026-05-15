@@ -7,6 +7,8 @@ CONFIG_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.pa
 from telegram import Update
 from telegram.ext import ContextTypes
 
+def _get_admin_list():
+    return [admin_id.strip() for admin_id in os.getenv("ADMIN_LIST", "").split(",") if admin_id.strip()]
 
 class endpoints:
     def __init__(self) -> None:
@@ -42,7 +44,9 @@ class endpoints:
 # /llminfo
 async def llminfo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(datetime.datetime.now(), "\t", "[modules.LLM.endpoint_settings] Received " + update.message.text + ", ", end="")
-    usage_msg = "Usage:\n/llminfo Show available LLM list and LLM currently using.\n/llminfo set <model alias> Set LLM to use."
+    usage_msg = ("Usage:\n"
+                 "/llminfo -- Show available LLM list and LLM currently using.\n"
+                 "/llminfo set <model alias> -- Set LLM to use.")
     # /llminfo, output
     if update.message.text == "/llminfo":
         print(datetime.datetime.now(), "\t", "[modules.LLM.endpoint_settings.llminfo] /llminfo called")
@@ -70,7 +74,7 @@ async def llminfo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.text.startswith("/llminfo set"):
         print(datetime.datetime.now(), "\t", "[modules.LLM.endpoint_settings.llminfo] /llminfo set called")
 
-        if not update.message.from_user.id == 5418690874:  # 5418690874: Longtail, change as you wish
+        if str(update.message.from_user.id) not in _get_admin_list():
             print(datetime.datetime.now(), "\t", "[modules.LLM.endpoint_settings.llminfo] Not Longtail.")
             await context.bot.send_message(chat_id=update.effective_chat.id,
                                            text="Only Longtail can perform this operation.")

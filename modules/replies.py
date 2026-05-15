@@ -11,6 +11,9 @@ from telegram.ext.filters import MessageFilter
 # Get the base directory (two levels up from this file)
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+def _get_admin_list():
+    return [admin_id.strip() for admin_id in os.getenv("ADMIN_LIST", "").split(",") if admin_id.strip()]
+
 # '国行' reaction filter
 class AppleCNMSGFilter(MessageFilter):
     def filter(self, message):
@@ -196,10 +199,10 @@ async def xm_and_fire(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def xm_and_fire_settings(update: Update, context: ContextTypes.DEFAULT_TYPE, xm_and_fire_filter_obj):
     print(datetime.datetime.now(), "\t", "[replies] Received " + update.message.text + ", ", end="")
     usage_msg = ("Usage:\n"
-                 "/xianmufire <on/off> Toggle xm and fire reaction.\n"
-                 "/xianmufire set <possibility> Set xm and fire possibility in [0, 1].\n"
-                 "/xianmufire % Show current settings.\n"
-                 "/xianmufire suppress <minutes> Suppress this function for a period of time.")
+                 "/xianmufire <on/off> -- Toggle xm and fire reaction.\n"
+                 "/xianmufire set <possibility> -- Set xm and fire possibility in [0, 1].\n"
+                 "/xianmufire [0, 1] -- Show current settings.\n"
+                 "/xianmufire suppress <minutes> -- Suppress this function for a period of time.")
     if update.effective_chat.type not in ['group', 'supergroup']:
         await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text="This command is only available in group.")
@@ -214,10 +217,8 @@ async def xm_and_fire_settings(update: Update, context: ContextTypes.DEFAULT_TYP
 
     # only group admins can change the settings
     # if not admin, return
-    if not (await update.effective_chat.get_member(update.effective_user.id)).status in ['administrator',
-                                                                                         'creator']:
-        await context.bot.send_message(chat_id=update.effective_chat.id,
-                                       text="Only group admins can use this command.")
+    if (await update.effective_chat.get_member(update.effective_user.id)).status not in ['administrator', 'creator'] and str(update.message.from_user.id) not in _get_admin_list():
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="Only group admins can use this command.")
         print("Not admin. Return now.")
         return
 
@@ -364,6 +365,7 @@ async def delete_xm_msg(context, chat_id, message):
 
 class ls:
     cache_file_path = os.path.join(base_dir, 'config', 'member_cache.json')
+    ls_config = os.path.join(base_dir, 'config', 'ls_config.json')
     member_cache = {}  # {chat_id: {username: user_id, ...}}
 
     # message handler, catch message and cache to member cache
@@ -433,14 +435,63 @@ class ls:
             print(f"{self.cache_file_path} is corrupted, returning empty cache.")
             return {}
 
+    def load_ls_config(self) -> dict:
+        try:
+            with open(self.ls_config, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+            return {int(k): bool(v) for k, v in config.items()}
+        except FileNotFoundError:
+            print(f"{self.ls_config} not found, creating empty config.")
+            self.save_ls_config({})
+            return {}
+        except json.JSONDecodeError:
+            print(f"{self.ls_config} is corrupted, recreating empty config.")
+            self.save_ls_config({})
+            return {}
+
+    def save_ls_config(self, config: dict):
+        with open(self.ls_config, 'w', encoding='utf-8') as f:
+            json.dump({str(k): bool(v) for k, v in config.items()}, f, ensure_ascii=False, indent=2)
+        print(f"LS config saved to {self.ls_config}")
+
     async def ls(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        print(datetime.datetime.now(), "\t", "[replies.ls] Received /ls")
+        print(datetime.datetime.now(), "\t", "[replies.ls] Received " + update.message.text)
         usage_msg = "config  download  LICENSE  modules  README.md  requirements.txt  docker  image_search  main.py  pyproject.toml  README_zh.md  tools"
-        # TODO: read config file if ls enabled
-        ls_enabled = True
+
+        ls_config = self.load_ls_config()
+        chat_id = update.effective_chat.id
+        command_text = update.message.text.strip()
+        # catch /ls enable & /ls disable here
+        if command_text in ["/ls enable", f"/ls@{context.bot.username} enable", "/ls disable", f"/ls@{context.bot.username} disable"]:
+            # only group admins can change the settings
+            # if not admin, return
+            if (await update.effective_chat.get_member(update.effective_user.id)).status not in ['administrator', 'creator'] and str(update.message.from_user.id) not in _get_admin_list():
+                await context.bot.send_message(chat_id=update.effective_chat.id, text="Only group admins can use this command.")
+                print("Not admin. Return now.")
+                return
+            # handle enable and disable command
+            if command_text.endswith("enable"):
+                ls_config[chat_id] = True
+                self.save_ls_config(ls_config)
+                await context.bot.send_message(chat_id=chat_id, text="ls enabled.")
+                print(datetime.datetime.now(), "\t", "[replies.ls] ls enabled for this group.")
+                return
+            elif command_text.endswith("disable"):
+                ls_config[chat_id] = False
+                self.save_ls_config(ls_config)
+                await context.bot.send_message(chat_id=chat_id, text="ls disabled.")
+                print(datetime.datetime.now(), "\t", "[replies.ls] ls disabled for this group.")
+                return
+
+        # If group not in config, initialize as disabled
+        if chat_id not in ls_config:
+            ls_config[chat_id] = False
+            self.save_ls_config(ls_config)
+
+        ls_enabled = ls_config.get(chat_id, False)
 
         # If not enabled
-        if ls_enabled == False:
+        if not ls_enabled:
             print(datetime.datetime.now(), "\t", "[replies.ls] ls not enabled. Sending default")
             await context.bot.send_message(chat_id=update.effective_chat.id, text=usage_msg)
             return
