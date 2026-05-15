@@ -524,7 +524,7 @@ class ls:
                 user2_username = re.match(r'^/ls@.* (.+)', update.message.text).group(1)
             elif re.match(r'^/ls .+', update.message.text):
                 user2_username = re.match(r'^/ls (.+)', update.message.text).group(1)
-            elif update.message.text == "/ls":
+            elif update.message.text == "/ls" or "/ls@"+context.bot.username == update.message.text:
                 # Check if this message is a reply, if so, extract user from reply_to_message
                 if update.message.reply_to_message:
                     user2_id = update.message.reply_to_message.from_user.id
@@ -533,7 +533,7 @@ class ls:
                     print(datetime.datetime.now(), "\t", f"{user1_name} lifted their own skirt. Return.")
                     await context.bot.send_message(chat_id=update.effective_chat.id, text=f"{user1_name} 提起了自己的裙摆。")
                     return
-            else:   # user lift skirt of theirself
+            else:
                 await context.bot.send_message(chat_id=update.effective_chat.id, text=usage_msg)
                 print(datetime.datetime.now(), "\t", "[replies.ls] Showing usage")
                 return
