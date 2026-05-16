@@ -149,9 +149,9 @@ async def main():
     application.add_handler(ls_handler)
 
     # message handlers at the end
-    # ls handler
+    # ls cache handler need to catch all messages so put it in a different group
     ls_cache_handler = MessageHandler(None, ls_instance.cache_updater)
-    application.add_handler(ls_cache_handler)
+    application.add_handler(ls_cache_handler, group=1)
 
     # what to eat today handler
     if os.getenv("ENABLE_WHAT_TO_EAT").lower() == "true":
@@ -171,10 +171,10 @@ async def main():
         application.add_handler(dinno_mienmien_mao_handler)
 
     # xm and fire reaction handler
-    # this handler must be put after all message handlers
+    # the same as ls cache, xmfire need to catch all too, put in different group
     xm_and_fire_reaction_filter.reload_config()
     xm_and_fire_reaction_handler = MessageHandler(xm_and_fire_reaction_filter, xm_and_fire)
-    application.add_handler(xm_and_fire_reaction_handler)
+    application.add_handler(xm_and_fire_reaction_handler, group=2)
 
     # inline mentioned handler
     from modules.inline import inline_query
